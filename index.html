@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<title>Статус ключевых HR-задач</title>
+<style>
+  :root{
+    color-scheme:light;
+    --navy-deep:#001F5F;
+    --navy:#001F5F;
+    --navy-2:#0A2A73;
+    --navy-soft:#41618F;
+    --blue:#41618F;
+    --gold:#6D7FE8;
+    --gold-soft:#C9D3FA;
+    --pale:#EDF1F8;
+    --white:#FFFFFF;
+    --bg:#F4F6FA;
+    --card:#FFFFFF;
+    --line:#E4E9F1;
+    --soft:#F7F9FC;
+    --text:#2C3A54;
+    --muted:#8E9CB4;
+    --grey:#A9B4C6;
+    --red:#9C5F5F;
+    --red-bg:#F6ECEC;
+    --amber:#7E6BA8;
+    --amber-bg:#F0ECF7;
+    --green:#5E8A6C;
+    --green-bg:#F1F6F2;
+    --radius:12px;
+    --maxw:1120px;
+    --gut:max(14px, calc((100% - var(--maxw)) / 2));
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background-color:#F4F6FA;}
+  body{
+    color:#2C3A54;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* Keep the light palette even where the browser tries to auto-darken. */
+  @media (prefers-color-scheme: dark){
+    html,body{background-color:#F4F6FA !important;}
+    body{color:#2C3A54 !important;}
+    .card,.timeline-wrap,.exec,.controls,.team-card,.dates-box,.status-box{background-color:#FFFFFF !important;}
+  }
+
+  /* ---------- Password gate ---------- */
+  #password-screen{
+    position:fixed;inset:0;z-index:999;
+    background-color:#001F5F;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  #password-screen .pw-card{
+    background-color:#FFFFFF;border-radius:12px;padding:26px 24px;
+    width:100%;max-width:330px;text-align:left;
+  }
+  #password-screen .pw-eyebrow{
+    font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:#8E9CB4;margin-bottom:6px;
+  }
+  #password-screen h2{font-size:16px;font-weight:800;color:#001F5F;margin:0 0 16px;}
+  #password-screen input{
+    width:100%;border:1px solid #E4E9F1;border-radius:9px;padding:10px 12px;
+    font-size:14px;font-family:inherit;background-color:#FFFFFF;color:#2C3A54;
+  }
+  #password-screen input:focus{outline:none;border-color:#41618F;}
+  #password-screen button{
+    width:100%;margin-top:10px;border:none;border-radius:9px;padding:11px;
+    background-color:#001F5F;color:#FFFFFF;font-size:13px;font-weight:700;
+    font-family:inherit;cursor:pointer;
+  }
+  #password-screen button:hover{background-color:#0A2A73;}
+  #pw-error{font-size:11.5px;color:#9C5F5F;margin-top:9px;min-height:15px;font-weight:600;}
+
+  /* ---------- Header ---------- */
+  .hero{
+    background-color:#001F5F;
+    padding:14px var(--gut) 14px;
+  }
+  .hero, .hero *{color:#FFFFFF;}
+  .hero-top{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+    max-width:var(--maxw);margin:0 auto;
+  }
+  .eyebrow{
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:#8FA8CC !important;font-weight:600;margin-bottom:5px;
+  }
+  .hero h1{font-size:17px;font-weight:800;margin:0 0 4px;letter-spacing:-0.01em;}
+  .hero .sub{
+    font-size:10px;color:#8FA8CC !important;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin-bottom:0;
+  }
+
+  .pdf-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background-color:rgba(255,255,255,0.12);border:none;color:#FFFFFF;
+    padding:8px 13px;border-radius:8px;font-size:11.5px;font-weight:700;
+    font-family:inherit;cursor:pointer;white-space:nowrap;
+  }
+  .pdf-btn:hover{background-color:rgba(255,255,255,0.2);}
+
+  .stats-row{
+    display:flex;gap:6px;flex-wrap:wrap;
+    max-width:var(--maxw);margin:13px auto 0;
+  }
+  .stat{
+    background-color:rgba(255,255,255,0.10);border-radius:9px;
+    padding:9px 13px;min-width:98px;flex:1;
+  }
+  .stat .num{font-size:19px;font-weight:800;line-height:1;margin-bottom:5px;font-variant-numeric:tabular-nums;}
+  .stat .label{font-size:9.5px;color:#8FA8CC !important;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  .stat.flagged .num{color:#C9D3FA !important;}
+
+  /* ---------- Section labels ---------- */
+  .timeline-title, .team-title{
+    font-size:10.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline-wrap{
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px 11px;max-width:var(--maxw);margin:16px auto 0;
+  }
+  .timeline-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;}
+  .week-col{min-width:124px;max-width:124px;flex-shrink:0;border-left:2px solid var(--line);padding-left:9px;}
+  .week-col.current{border-left-color:var(--gold);}
+  .week-label{font-size:9.5px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+  .week-col.current .week-label{color:var(--gold);}
+  .tl-item{display:flex;align-items:flex-start;gap:5px;font-size:10.5px;line-height:1.35;margin-bottom:6px;color:var(--text);}
+  .tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+  .tl-dot.p1{background-color:var(--red);}
+  .tl-dot.p2{background-color:var(--amber);}
+  .tl-dot.p3{background-color:var(--green);}
+  .tl-dot.p4{background-color:var(--grey);}
+  .tl-item.deadline .tl-dot{border-radius:2px;background-color:var(--navy);}
+  .tl-empty{font-size:10px;color:var(--grey);}
+  .tl-item.overduemark{color:var(--red);font-weight:700;}
+
+  /* ---------- Executive summary ---------- */
+  .exec{
+    background-color:#FFFFFF;border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:var(--radius);padding:15px 18px;
+    max-width:var(--maxw);margin:12px auto 0;
+  }
+  .exec-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px;}
+  .exec-title{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted);}
+  .exec-toggle{font-size:10.5px;color:var(--muted);font-weight:700;white-space:nowrap;}
+  .exec-list{margin:12px 0 2px;padding:0;list-style:none;}
+  .exec-list li{font-size:12.5px;line-height:1.55;padding:5px 0 5px 18px;position:relative;color:var(--text);}
+  .exec-list li::before{content:"—";position:absolute;left:0;color:var(--gold);font-weight:800;}
+  .exec-list li b{color:var(--navy);font-weight:800;}
+  .exec.collapsed .exec-list, .exec.collapsed .exec-subtitle{display:none;}
+  .exec-subtitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin:15px 0 4px;}
+  .exec-list.risks li::before{content:"⚠";color:var(--red);font-size:11px;}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    position:sticky;top:0;z-index:20;
+    background-color:#FFFFFF;border-bottom:1px solid var(--line);
+    padding:11px var(--gut);margin-top:18px;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .search-box{flex:1;min-width:180px;position:relative;}
+  .search-box input{
+    width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);border-radius:9px;
+    font-size:13px;font-family:inherit;background-color:#FFFFFF;color:var(--text);outline:none;
+  }
+  .search-box input:focus{border-color:var(--navy-soft);}
+  .search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:0.5;}
+
+  .chip{
+    border:1px solid var(--line);background-color:#FFFFFF;color:var(--muted);
+    padding:8px 12px;border-radius:9px;font-size:12px;font-weight:700;
+    cursor:pointer;white-space:nowrap;font-family:inherit;
+  }
+  .chip:hover{border-color:var(--navy-soft);color:var(--navy);}
+  .chip.active{background-color:#001F5F;border-color:#001F5F;color:#FFFFFF !important;}
+
+  select.selectctl{
+    border:1px solid var(--line);background-color:#FFFFFF;color:var(--text);
+    padding:8px 28px 8px 11px;border-radius:9px;font-size:12px;font-weight:700;
+    cursor:pointer;font-family:inherit;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238E9CB4' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center;background-size:13px;
+  }
+  select.selectctl:focus{outline:none;border-color:var(--navy-soft);}
+
+  /* ---------- Content ---------- */
+  .content{padding:18px var(--gut) 40px;}
+  .section-block{margin-bottom:22px;}
+  .section-header{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;
+    padding:9px 13px;background-color:#001F5F;border-radius:9px;
+  }
+  .section-header h2{
+    font-size:10.5px;font-weight:800;color:#FFFFFF;margin:0;
+    text-transform:uppercase;letter-spacing:.1em;
+  }
+  .section-count{
+    font-size:10px;color:#C9D3FA;font-weight:700;background-color:rgba(255,255,255,0.13);
+    padding:3px 8px;border-radius:6px;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;}
+  .card{
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 15px 12px;cursor:pointer;break-inside:avoid;
+    transition:border-color .15s ease, background-color .15s ease;
+  }
+  .card:hover{background-color:#F9FBFD;border-color:#D6DEEB;}
+  .card.open{background-color:#FFFFFF;}
+  .card.overdue{border-left:3px solid var(--red);}
+
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px;}
+  .card h3{font-size:13.5px;margin:0;line-height:1.4;color:var(--navy);font-weight:800;flex:1;}
+  .tag-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+  .new-tag,.risk-tag,.overdue-tag,.attn-badge{
+    font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;letter-spacing:.02em;
+  }
+  .new-tag{color:var(--green);background-color:var(--green-bg);}
+  .risk-tag{color:var(--amber);background-color:var(--amber-bg);}
+  .overdue-tag{color:#FFFFFF;background-color:var(--red);}
+  .attn-badge{background-color:#001F5F;color:#FFFFFF;}
+
+  .card-meta{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);margin-bottom:9px;}
+  .avatar{
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;font-weight:800;color:#fff;flex-shrink:0;
+  }
+
+  .meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .priority-flag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;}
+  .flagchar{font-size:14px;line-height:1;}
+  .flagchar.p1{color:var(--red);}
+  .flagchar.p2{color:var(--amber);}
+  .flagchar.p3{color:var(--green);}
+  .flagchar.p4{color:var(--grey);}
+  .priority-label.p1{color:var(--red);}
+  .priority-label.p2{color:var(--amber);}
+  .priority-label.p3{color:var(--green);}
+  .priority-label.p4{color:var(--grey);}
+
+  .dates-box{background-color:var(--soft);border-radius:8px;padding:8px 11px;margin-bottom:2px;}
+  .date-line{display:flex;align-items:center;gap:7px;font-size:11.5px;padding:2px 0;}
+  .date-line .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .date-line .dot.overdue{background-color:var(--red);}
+  .date-line .dot.today{background-color:var(--amber);}
+  .date-line .dot.ok{background-color:var(--green);}
+  .date-line .dot.none{background-color:var(--grey);}
+  .date-line .label{color:var(--muted);min-width:130px;}
+  .date-line .value{font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
+  .date-line .value.overdue{color:var(--red);}
+  .date-line .value.today{color:var(--amber);}
+  .date-line.deadline .dot{border-radius:2px;background-color:var(--navy);}
+  .date-line.deadline .value{color:var(--navy);}
+  .date-line.deadline .label{color:var(--navy-soft);}
+
+  .card-detail{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .card.open .card-detail{max-height:900px;}
+  .detail-inner{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+  .detail-block{margin-bottom:11px;}
+  .detail-label{
+    font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-bottom:5px;
+  }
+  .detail-text{font-size:12px;line-height:1.55;color:var(--text);white-space:pre-line;}
+  .status-box{background-color:var(--soft);border-radius:8px;padding:9px 11px;}
+  .status-meta{font-size:10px;color:var(--muted);margin-top:6px;}
+
+  .history-item{padding:7px 0 7px 11px;border-left:2px solid var(--line);margin-bottom:2px;}
+  .history-item .detail-text{font-size:11.5px;color:var(--muted);}
+  .history-item .status-meta{margin-top:4px;}
+
+  .todoist-link{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;
+    color:var(--navy-soft);font-weight:700;text-decoration:none;margin-top:6px;
+  }
+  .todoist-link:hover{text-decoration:underline;}
+  .expand-hint{font-size:10px;color:var(--muted);margin-top:11px;display:flex;align-items:center;gap:4px;}
+  .chevron{transition:transform .2s ease;}
+  .card.open .chevron{transform:rotate(180deg);}
+
+  .empty{
+    text-align:center;padding:36px 20px;color:var(--muted);font-size:12.5px;
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);
+  }
+
+  /* ---------- Team ---------- */
+  .team-wrap{padding:0 var(--gut) 10px;}
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:10px;}
+  .team-card{
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 14px;display:flex;align-items:center;gap:11px;
+  }
+  .team-avatar{
+    width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;background-color:var(--pale);
+  }
+  .team-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+  .team-name{font-size:12.5px;font-weight:800;color:var(--navy);margin-bottom:2px;}
+  .team-role{font-size:11px;color:var(--muted);line-height:1.4;}
+
+  footer{
+    padding:16px var(--gut) 26px;font-size:10.5px;color:var(--muted);
+    border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+
+  @media print{
+    .controls, .expand-hint, .pdf-btn, #password-screen, #toTop{display:none !important;}
+    body{background-color:#fff;}
+    .card{break-inside:avoid;}
+    .card-detail{max-height:none !important;overflow:visible !important;}
+    .exec.collapsed .exec-list, .exec.collapsed .exec-subtitle{display:block !important;}
+    .timeline-scroll{overflow-x:visible;flex-wrap:wrap;}
+    a.todoist-link{display:none;}
+  }
+
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr;}
+    .hero-top{flex-direction:column;}
+    .stat{min-width:calc(50% - 3px);}
+    .date-line .label{min-width:112px;}
+  }
+
+  /* ================= v2: секции, карта отчёта, интерактив ================= */
+
+  .map-wrap, .owners-wrap{
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 17px;max-width:var(--maxw);margin:14px auto 0;
+  }
+  .map-title, .owners-title{
+    font-size:10.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.1em;margin-bottom:11px;
+    display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  }
+  .map-title span, .owners-title span{text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;}
+
+  .map-bar{display:flex;height:11px;border-radius:6px;overflow:hidden;background-color:var(--pale);margin-bottom:13px;}
+  .map-bar i{display:block;height:100%;cursor:pointer;transition:opacity .15s ease;}
+  .map-bar i:hover{opacity:.72;}
+
+  .map-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:9px;}
+  .map-card{
+    background-color:var(--sb);border:1px solid transparent;border-left:3px solid var(--sc);
+    border-radius:10px;padding:10px 12px;cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .map-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,95,0.10);}
+  .map-card.active{border-color:var(--sc);box-shadow:0 0 0 2px var(--sc) inset;}
+  .map-name{font-size:11.5px;font-weight:800;color:var(--navy);line-height:1.3;min-height:30px;}
+  .map-foot{display:flex;align-items:baseline;gap:7px;margin-top:7px;flex-wrap:wrap;}
+  .map-num{font-size:20px;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums;}
+  .map-unit{font-size:10px;color:var(--muted);font-weight:700;}
+  .map-flags{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+  .map-flag{
+    font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;
+    background-color:rgba(255,255,255,0.75);color:var(--navy-soft);
+  }
+  .map-flag.red{color:var(--red);}
+  .map-flag.navy{color:var(--navy);}
+
+  /* ---------- Загрузка по ответственным ---------- */
+  .owner-row{
+    display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:8px;cursor:pointer;
+  }
+  .owner-row:hover{background-color:#F9FBFD;}
+  .owner-row.active{background-color:var(--pale);}
+  .owner-row .avatar{width:22px;height:22px;font-size:9px;}
+  .owner-row .oname{font-size:11.5px;font-weight:800;color:var(--navy);min-width:118px;}
+  .owner-row .obar{flex:1;height:9px;border-radius:5px;background-color:var(--pale);overflow:hidden;min-width:60px;}
+  .owner-row .obar i{display:block;height:100%;border-radius:5px;}
+  .owner-row .ocount{font-size:11px;font-weight:800;color:var(--text);min-width:20px;text-align:right;font-variant-numeric:tabular-nums;}
+
+  /* ---------- Навигация по разделам (пилюли) ---------- */
+  .pills{
+    display:flex;gap:6px;overflow-x:auto;flex-basis:100%;padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .pills::-webkit-scrollbar{display:none;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;
+    border:1px solid var(--line);background-color:#FFFFFF;color:var(--text);
+    padding:6px 11px;border-radius:9px;font-size:11.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:border-color .15s ease, background-color .15s ease;
+  }
+  .pill .pdot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+  .pill b{font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .pill:hover{border-color:var(--navy-soft);}
+  .pill.active{background-color:#001F5F;border-color:#001F5F;color:#FFFFFF;}
+  .pill.active b{color:#C9D3FA;}
+
+  /* ---------- Секции и карточки в цвете раздела ---------- */
+  .section-block{scroll-margin-top:120px;}
+  .section-header{border-left:4px solid var(--sc,#6D7FE8);}
+  .section-header .shead{display:flex;align-items:center;gap:9px;min-width:0;}
+  .section-header .sdot{width:9px;height:9px;border-radius:3px;background-color:var(--sc,#6D7FE8);flex-shrink:0;}
+  .section-count{background-color:var(--sc,#6D7FE8) !important;color:#FFFFFF !important;}
+
+  .card{border-left:3px solid var(--sc,#E4E9F1);}
+  .card:hover{box-shadow:0 6px 18px rgba(0,31,95,0.10);transform:translateY(-1px);}
+  .card.open{box-shadow:0 8px 22px rgba(0,31,95,0.12);}
+  .card.overdue{border-left-color:var(--red) !important;}
+  .card .avatar{cursor:pointer;}
+  .card h3{color:var(--navy);}
+
+  .detail-label{color:var(--sc,var(--muted));}
+
+  /* ---------- Кнопка «наверх» ---------- */
+  #toTop{
+    position:fixed;right:16px;bottom:16px;z-index:40;display:none;
+    width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+    background-color:#001F5F;color:#FFFFFF;font-size:15px;font-family:inherit;
+    box-shadow:0 6px 18px rgba(0,31,95,0.28);
+  }
+  #toTop.show{display:block;}
+
+  @media (max-width:640px){
+    .map-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+    .owner-row .oname{min-width:0;flex:1;}
+    .owner-row .obar{flex:0 0 70px;}
+  }
+
+
+  .stat[data-filter]{cursor:pointer;transition:background-color .15s ease;}
+  .stat[data-filter]:hover{background-color:rgba(255,255,255,0.20);}
+  .map-bar i{border-right:1px solid rgba(255,255,255,0.55);}
+  .map-bar i:last-child{border-right:none;}
+
+  .chip.reset{border-color:#D6DEEB;color:var(--navy);}
+  .chip.reset:hover{background-color:var(--pale);}
+
+  @media (max-width:640px){
+    .map-title span, .owners-title span{display:none;}
+    .map-name{min-height:0;}
+  }
+
+  /* ---------- Таймлайн: выделенные шапки недель ---------- */
+  .timeline-scroll{gap:8px;padding-bottom:8px;}
+  .week-col{
+    min-width:150px;max-width:150px;flex-shrink:0;
+    border-left:none;padding-left:0;
+    background-color:#FFFFFF;border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+  .week-label{
+    display:flex;align-items:center;justify-content:space-between;gap:6px;
+    background-color:var(--pale);color:var(--navy);
+    font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    padding:7px 9px;margin-bottom:0;border-bottom:1px solid var(--line);
+  }
+  .week-count{
+    background-color:rgba(0,31,95,0.10);color:var(--navy);
+    font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;
+    font-variant-numeric:tabular-nums;flex-shrink:0;
+  }
+  .week-col.current .week-label{background-color:#001F5F;color:#FFFFFF;border-bottom-color:#001F5F;}
+  .week-col.current .week-count{background-color:rgba(255,255,255,0.22);color:#FFFFFF;}
+  .week-col.overduecol{border-color:#E7D2D2;}
+  .week-col.overduecol .week-label{background-color:#F6ECEC;color:var(--red);border-bottom-color:#E7D2D2;}
+  .week-col.overduecol .week-count{background-color:rgba(156,95,95,0.14);color:var(--red);}
+  .tl-item{padding:0 9px;margin-bottom:7px;}
+  .tl-item:first-of-type{margin-top:9px;}
+  .tl-item:last-child{margin-bottom:10px;}
+  .tl-empty{padding:11px 9px 12px;text-align:center;}
+
+  @media (max-width:640px){
+    .week-col{min-width:138px;max-width:138px;}
+  }
+
+  .week-label{min-height:31px;}
+
+  /* ================= v3: единый стиль блоков ================= */
+  .blk{
+    background-color:#FFFFFF;border:1px solid var(--line);border-top:3px solid var(--ac,#6D7FE8);
+    border-radius:var(--radius);padding:0;max-width:var(--maxw);margin:14px auto 0;
+    overflow:hidden;
+  }
+  .blk-map{--ac:#6D7FE8;--ac-soft:#ECEFFC;}
+  .blk-own{--ac:#3FA286;--ac-soft:#E3F4EE;}
+  .blk-tl{--ac:#3E9AC0;--ac-soft:#E4F2F8;}
+  .blk-exec{--ac:#8A6FB8;--ac-soft:#F0EAF9;}
+  .blk-team{--ac:#4F86C7;--ac-soft:#E7EFFA;}
+
+  .blk-head{
+    display:flex;align-items:center;gap:9px;cursor:pointer;
+    padding:12px 16px;background-color:#FFFFFF;
+    border-bottom:1px solid transparent;
+  }
+  .blk-head:hover{background-color:#F9FBFD;}
+  .blk-icon{
+    width:26px;height:26px;border-radius:8px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background-color:var(--ac-soft,#ECEFFC);
+    color:var(--ac);
+  }
+  .blk-icon svg{width:15px;height:15px;}
+  .blk-title{
+    font-size:12.5px;font-weight:800;color:var(--navy);letter-spacing:-0.01em;
+    white-space:nowrap;
+  }
+  .blk-hint{
+    font-size:10.5px;color:var(--muted);font-weight:600;flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .blk-toggle{font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;flex-shrink:0;}
+  .blk-body{padding:0 16px 15px;}
+  .blk.collapsed .blk-body{display:none;}
+  .blk.collapsed .blk-head{border-bottom-color:transparent;}
+
+  /* старые обёртки больше не нужны */
+  .map-wrap,.owners-wrap,.timeline-wrap,.team-wrap{all:unset;}
+
+  /* exec внутри новой оболочки */
+  .exec{border-left:1px solid var(--line);padding:0;}
+  .exec .exec-list{margin:0 0 2px;padding:0 16px 0;}
+  .exec .exec-subtitle{margin:14px 16px 6px;}
+  .exec-list li:hover{background-color:#F9FBFD;border-radius:7px;}
+  .exec-list.risks{
+    background-color:#F9F1F1;border:1px solid #EDDCDC;border-radius:10px;
+    margin:0 16px 14px;padding:4px 12px;
+  }
+  .exec-list.risks li{color:#7C4B4B;}
+  .exec-list.risks li:hover{background-color:transparent;}
+  .exec-list.risks li b{color:#8A4A4A;}
+  .exec.collapsed{padding-bottom:0;}
+
+  .team-grid{padding-top:2px;}
+  .team-card{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;}
+  .team-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,95,0.10);border-color:#C9D3FA;}
+  .team-card.active{border-color:#6D7FE8;box-shadow:0 0 0 2px #C9D3FA;}
+
+  .tl-item{cursor:pointer;border-radius:6px;transition:background-color .12s ease;}
+  .tl-item:hover{background-color:var(--pale);}
+
+  .owner-row .obar i{transition:width .35s ease;}
+  .map-card{transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;}
+
+  @media (max-width:640px){
+    .blk-title{white-space:normal;}
+    .blk-hint{display:none;}
+    .blk-body{padding:0 12px 13px;}
+    .blk-head{padding:11px 12px;}
+    .exec .exec-list{padding-left:12px;padding-right:12px;}
+    .exec-list.risks{margin-left:12px;margin-right:12px;}
+    .exec .exec-subtitle{margin-left:12px;margin-right:12px;}
+  }
+
+  @media print{
+    .blk.collapsed .blk-body{display:block !important;}
+    .blk-toggle{display:none !important;}
+  }
+
+  @keyframes flashPulse{
+    0%{box-shadow:0 0 0 0 rgba(109,127,232,0.55);}
+    100%{box-shadow:0 0 0 12px rgba(109,127,232,0);}
+  }
+  .card.flash{animation:flashPulse 1.3s ease-out;border-color:#6D7FE8;}
+  @media (prefers-reduced-motion: reduce){
+    .card.flash{animation:none;}
+    *{scroll-behavior:auto !important;}
+  }
+
+  .blk-title{text-transform:none;}
+
+  /* ================= v4: матрица, приоритеты, эффекты ================= */
+  .blk-mx{--ac:#C77DBA;--ac-soft:#F8EAF5;}
+
+  .mx-scroll{overflow-x:auto;padding-top:2px;}
+  table.mx{border-collapse:separate;border-spacing:3px;width:100%;min-width:640px;}
+  table.mx th, table.mx td{font-size:11px;font-weight:700;padding:6px 7px;}
+  .mx-corner{
+    text-align:left;color:var(--muted);font-size:9.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;
+  }
+  .mx-col{
+    text-align:center;color:var(--navy);white-space:nowrap;cursor:pointer;
+    background-color:var(--pale);border-radius:7px;font-size:10px;
+  }
+  .mx-col:hover{background-color:#DDE5F3;}
+  .mx-dot{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:5px;}
+  .mx-row{
+    text-align:left;color:var(--navy);white-space:nowrap;cursor:pointer;
+    display:flex;align-items:center;gap:7px;background-color:var(--pale);border-radius:7px;
+  }
+  .mx-row:hover{background-color:#DDE5F3;}
+  .mx-row .avatar{width:20px;height:20px;font-size:8.5px;}
+  .mx-cell{
+    text-align:center;border-radius:7px;cursor:pointer;color:var(--navy);
+    font-size:12.5px;font-weight:800;position:relative;font-variant-numeric:tabular-nums;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .mx-cell:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,31,95,0.16);}
+  .mx-cell.active{box-shadow:0 0 0 2px var(--cc) inset;}
+  .mx-cell.empty{background-color:#FBFCFE;color:#CBD4E1;cursor:default;font-weight:600;}
+  .mx-cell.empty:hover{transform:none;box-shadow:none;}
+  .mx-mark{
+    position:absolute;top:3px;width:5px;height:5px;border-radius:50%;
+  }
+  .mx-mark.over{right:4px;background-color:#9C5F5F;}
+  .mx-mark.attn{right:11px;background-color:#001F5F;}
+  .mx-total{
+    text-align:center;color:var(--navy);background-color:#EDF1F8;border-radius:7px;
+    font-variant-numeric:tabular-nums;
+  }
+  tr.mx-foot td{background-color:#F7F9FC;border-radius:7px;text-align:center;color:var(--muted);}
+  tr.mx-foot .mx-row{cursor:default;background-color:transparent;color:var(--muted);
+    font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;}
+  tr.mx-foot .mx-row:hover{background-color:transparent;}
+
+  /* ---------- Приоритеты ---------- */
+  .prio-wrap{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
+  .prio-cap{
+    font-size:9.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;
+  }
+  .prio-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background-color:var(--pale);}
+  .prio-bar i{display:block;height:100%;cursor:pointer;border-right:1px solid rgba(255,255,255,0.6);}
+  .prio-bar i:last-child{border-right:none;}
+  .prio-bar i:hover{opacity:.75;}
+  .prio-legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+  .prio-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--line);background-color:#FFFFFF;color:var(--text);
+    padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;
+    cursor:pointer;font-family:inherit;
+  }
+  .prio-chip .pdot{width:8px;height:8px;border-radius:3px;}
+  .prio-chip b{color:var(--muted);font-variant-numeric:tabular-nums;}
+  .prio-chip:hover{border-color:var(--navy-soft);}
+  .prio-chip.active{background-color:#001F5F;border-color:#001F5F;color:#FFFFFF;}
+  .prio-chip.active b{color:#C9D3FA;}
+
+  /* ---------- Подсветка поиска ---------- */
+  mark{background-color:#FFF0B8;color:inherit;padding:0 2px;border-radius:3px;}
+
+  /* ---------- Появление блоков ---------- */
+  @keyframes blkIn{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:none;}
+  }
+  .blk.intro{animation:blkIn .45s ease-out both;}
+
+  @media (prefers-reduced-motion: reduce){
+    .blk.intro{animation:none;}
+    .mx-cell:hover{transform:none;}
+  }
+
+  @media print{
+    .blk.intro{animation:none !important;opacity:1 !important;transform:none !important;}
+  }
+
+  @media (max-width:640px){
+    .prio-legend{gap:5px;}
+  }
+
+  .mx-legend{
+    display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+    margin-top:11px;font-size:10.5px;color:var(--muted);font-weight:600;
+  }
+  .mx-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .mx-legend .lg{width:6px;height:6px;border-radius:50%;display:inline-block;}
+  .mx-legend .lg.over{background-color:#9C5F5F;}
+  .mx-legend .lg.attn{background-color:#001F5F;}
+  .mx-legend-note{margin-left:auto;font-style:normal;color:var(--grey);}
+  @media (max-width:640px){ .mx-legend .mx-legend-note{display:none;} }
+
+  /* ================= v5: график сроков (Гантт) ================= */
+  .g-scroll{overflow-x:auto;padding-top:2px;}
+  .gantt{min-width:720px;}
+
+  .g-head{display:grid;grid-template-columns:210px 1fr;align-items:end;margin-bottom:6px;}
+  .g-corner{
+    font-size:9.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;padding-bottom:5px;
+  }
+  .g-axis{display:flex;position:relative;border-bottom:1px solid var(--line);}
+  .g-week{
+    font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em;text-align:center;padding:4px 2px 6px;
+    border-left:1px solid var(--line);white-space:nowrap;overflow:hidden;
+  }
+  .g-week:first-child{border-left:none;}
+  .g-week.now{color:#FFFFFF;background-color:#001F5F;border-radius:6px 6px 0 0;border-left-color:#001F5F;}
+
+  .g-body{display:flex;flex-direction:column;gap:2px;}
+  .g-row{
+    display:grid;grid-template-columns:210px 1fr;align-items:center;
+    cursor:pointer;border-radius:7px;transition:background-color .12s ease;
+  }
+  .g-row:hover{background-color:#F4F7FC;}
+  .g-row.over .g-name{color:var(--red);font-weight:800;}
+  .g-label{
+    display:flex;align-items:center;gap:7px;min-width:0;
+    padding:5px 10px 5px 4px;font-size:11.5px;color:var(--text);font-weight:600;
+  }
+  .g-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+  .g-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .g-track{
+    position:relative;height:24px;background-repeat:repeat;
+    border-radius:5px;
+  }
+  .g-bar{
+    position:absolute;top:9px;height:7px;border-radius:4px;opacity:.55;
+    transition:opacity .15s ease;
+  }
+  .g-row:hover .g-bar{opacity:.9;}
+  .g-pt{
+    position:absolute;top:6px;width:12px;height:12px;border-radius:50%;
+    transform:translateX(-50%);
+  }
+  .g-pt.dl{
+    background-color:#FFFFFF;border:3px solid var(--navy);border-radius:3px;
+    width:12px;height:12px;
+  }
+  .g-row:hover .g-pt{box-shadow:0 0 0 4px rgba(0,31,95,0.09);}
+  .g-today{
+    position:absolute;top:0;bottom:0;width:2px;background-color:#001F5F;
+    opacity:.28;transform:translateX(-1px);pointer-events:none;
+  }
+  .g-today.head{opacity:.45;}
+
+  .g-legend{
+    display:flex;gap:15px;flex-wrap:wrap;align-items:center;
+    margin-top:12px;font-size:10.5px;color:var(--muted);font-weight:600;
+  }
+  .g-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .lg-pt{width:10px;height:10px;border-radius:50%;background-color:#6D7FE8;display:inline-block;}
+  .lg-pt.dl{background-color:#FFFFFF;border:3px solid var(--navy);border-radius:3px;}
+  .lg-line{width:22px;height:6px;border-radius:3px;background-color:#6D7FE8;opacity:.55;display:inline-block;}
+  .lg-today{width:2px;height:13px;background-color:#001F5F;opacity:.4;display:inline-block;}
+  .g-legend .g-note{margin-left:auto;color:var(--grey);}
+
+  .g-empty{
+    padding:22px 14px;text-align:center;color:var(--muted);font-size:12.5px;
+  }
+
+  @media (max-width:640px){
+    .g-head, .g-row{grid-template-columns:132px 1fr;}
+    .g-label{font-size:10.5px;padding-right:7px;}
+    .gantt{min-width:600px;}
+    .g-legend .g-note{margin-left:0;}
+  }
+
+  .g-months{display:flex;border-bottom:1px solid var(--line);}
+  .g-month{
+    font-size:10px;font-weight:800;color:var(--navy);text-transform:uppercase;
+    letter-spacing:.08em;padding:2px 4px 5px;text-align:center;white-space:nowrap;
+    overflow:hidden;border-left:1px solid var(--line);
+  }
+  .g-month:first-child{border-left:none;}
+  .g-ticks{display:flex;position:relative;border-bottom:1px solid var(--line);}
+  .g-week{padding:3px 1px 5px;font-size:9px;}
+  .g-week.now{
+    color:#FFFFFF;background-color:#001F5F;border-radius:5px 5px 0 0;
+    border-left-color:#001F5F;font-weight:800;
+  }
+  .g-nowband{
+    position:absolute;top:0;bottom:0;background-color:rgba(0,31,95,0.045);
+    pointer-events:none;border-radius:4px;
+  }
+  .g-ticks .g-nowband{background-color:transparent;}
+
+  .g-axis{display:block;position:relative;border-bottom:none;}
+
+  /* ================= v6 ================= */
+  .topstrip{display:flex;height:4px;width:100%;}
+  .topstrip i{flex:1;display:block;height:100%;}
+
+  .vbadge{
+    display:inline-block;margin-left:8px;padding:2px 7px;border-radius:5px;
+    background-color:rgba(255,255,255,0.16);color:#C9D3FA !important;
+    font-size:9px;font-weight:800;letter-spacing:.06em;vertical-align:1px;
+  }
+
+  /* превью статуса на свёрнутой карточке */
+  .card-preview{
+    display:flex;gap:7px;align-items:flex-start;margin-top:9px;
+    font-size:11.5px;line-height:1.45;color:var(--muted);
+  }
+  .cp-dot{
+    width:6px;height:6px;border-radius:50%;background-color:var(--sc,#6D7FE8);
+    flex-shrink:0;margin-top:5px;
+  }
+  .cp-text{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .card.open .card-preview{display:none;}
+
+  /* чипы в шапке раздела */
+  .section-header{justify-content:space-between;}
+  .shead-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .sh-chip{
+    font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;white-space:nowrap;
+  }
+  .sh-chip.over{background-color:rgba(255,255,255,0.16);color:#F2C7C7;}
+  .sh-chip.attn{background-color:#FFFFFF;color:#001F5F;}
+
+  /* подпись «сегодня» на графике */
+  .g-todaytag{
+    position:absolute;top:-2px;transform:translateX(-50%);
+    background-color:#001F5F;color:#FFFFFF;font-size:8.5px;font-weight:800;
+    padding:1px 6px;border-radius:5px;letter-spacing:.05em;white-space:nowrap;
+    pointer-events:none;
+  }
+  .g-axis{padding-top:12px;}
+  .g-row{min-height:28px;}
+  .g-track{height:26px;}
+  .g-bar{top:10px;}
+  .g-pt{top:7px;}
+
+  /* переключатель вида — как в казначейском отчёте */
+  .view-toggle{
+    display:inline-flex;background-color:var(--pale);border-radius:9px;padding:3px;gap:3px;
+    margin:0 0 12px;
+  }
+  .view-toggle button{
+    border:none;background-color:transparent;font-family:inherit;cursor:pointer;
+    font-size:11.5px;font-weight:800;padding:6px 14px;border-radius:7px;color:var(--navy-soft);
+  }
+  .view-toggle button.active{background-color:#001F5F;color:#FFFFFF;}
+  .view-toggle button:not(.active):hover{background-color:#DDE5F3;}
+  @media print{ .view-toggle{display:none !important;} }
+
+
+  /* ---------- Карточки разделов, v9 ---------- */
+  .map-grid{grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:10px;}
+  .map-card{
+    background-color:#FFFFFF;border:1px solid var(--line);border-left:1px solid var(--line);
+    border-radius:12px;padding:13px 14px 12px;cursor:pointer;
+    display:flex;flex-direction:column;gap:10px;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+  }
+  .map-card:hover{
+    transform:translateY(-3px);border-color:var(--sc);
+    box-shadow:0 10px 22px rgba(0,31,95,0.11);
+  }
+  .map-card.active{
+    background-color:var(--sb);border-color:var(--sc);box-shadow:0 0 0 1px var(--sc);
+  }
+  .mc-top{display:flex;align-items:flex-start;gap:11px;}
+  .mc-num{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background-color:var(--sc);color:#FFFFFF;
+    font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;
+    line-height:1;letter-spacing:-0.02em;
+  }
+  .mc-name{
+    font-size:12px;font-weight:800;color:var(--navy);line-height:1.35;
+    min-height:33px;display:flex;align-items:center;
+  }
+  .mc-bar{height:5px;border-radius:3px;background-color:var(--pale);overflow:hidden;}
+  .mc-bar i{display:block;height:100%;border-radius:3px;background-color:var(--sc);transition:width .5s ease;}
+  .mc-flags{display:flex;gap:5px;flex-wrap:wrap;min-height:19px;align-items:center;}
+  .mc-flag{
+    font-size:9.5px;font-weight:800;padding:3px 7px;border-radius:5px;white-space:nowrap;
+    letter-spacing:.01em;
+  }
+  .mc-flag.over{background-color:#F6ECEC;color:#9C5F5F;}
+  .mc-flag.attn{background-color:#001F5F;color:#FFFFFF;}
+  .mc-flag.fresh{background-color:#F1F6F2;color:#5E8A6C;}
+  .mc-flag.calm{background-color:transparent;color:#C3CCDA;font-weight:600;padding-left:0;}
+
+  @media (max-width:640px){
+    .map-grid{grid-template-columns:1fr 1fr;gap:8px;}
+    .mc-name{font-size:11px;min-height:44px;}
+    .mc-num{width:34px;height:34px;font-size:15px;border-radius:10px;}
+  }
+
+  .week-col.latercol .week-label{background-color:#EFEAF7;color:#6E5A93;border-bottom-color:#E2D8F0;}
+  .week-col.latercol .week-count{background-color:rgba(110,90,147,0.14);color:#6E5A93;}
+  .week-col.latercol{border-color:#E2D8F0;}
+  .week-col.nodatecol .week-label{background-color:#F1F3F7;color:#8E9CB4;border-bottom-color:#E4E9F1;}
+  .week-col.nodatecol .week-count{background-color:rgba(142,156,180,0.16);color:#8E9CB4;}
+</style>
+</head>
+<body>
+
+<div id="password-screen">
+  <div class="pw-card">
+    <div class="pw-eyebrow">Whitecliff Group · HR</div>
+    <h2>Введите пароль</h2>
+    <input id="pw-input" type="password" autocomplete="off" placeholder="Пароль">
+    <button id="pw-submit" type="button">Открыть отчёт</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+
+<div class="topstrip">
+  <i style="background-color:#6D7FE8"></i><i style="background-color:#3E9AC0"></i><i style="background-color:#8A6FB8"></i><i style="background-color:#3FA286"></i><i style="background-color:#D07AA0"></i><i style="background-color:#C77DBA"></i><i style="background-color:#4F86C7"></i><i style="background-color:#6FA45C"></i>
+</div>
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="eyebrow">Whitecliff Group</div>
+      <h1>Статус ключевых HR-задач</h1>
+      <div class="sub">Обновлено 10 сентября 2026 <span class="vbadge">v16 · 10.09.2026</span></div>
+    </div>
+    <button class="pdf-btn" onclick="exportPDF()">🖨 Экспорт в PDF</button>
+  </div>
+  <div class="stats-row" id="statsRow"></div>
+</div>
+
+<div class="blk blk-map" data-blk="map">
+  <div class="blk-head">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+    <div class="blk-title">Разделы отчёта</div>
+    <div class="blk-hint">нажмите на раздел, чтобы отфильтровать</div>
+    <span class="blk-toggle">Свернуть ▲</span>
+  </div>
+  <div class="blk-body">
+    <div class="map-bar" id="mapBar"></div>
+    <div class="map-grid" id="sectionMap"></div>
+  </div>
+</div>
+
+<div class="blk blk-own" data-blk="own">
+  <div class="blk-head">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.5"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/></svg></span>
+    <div class="blk-title">Загрузка по ответственным</div>
+    <div class="blk-hint">нажмите на строку, чтобы отфильтровать</div>
+    <span class="blk-toggle">Свернуть ▲</span>
+  </div>
+  <div class="blk-body">
+    <div id="ownerChart"></div>
+    <div class="prio-wrap">
+      <div class="prio-cap">По приоритету</div>
+      <div class="prio-bar" id="prioBar"></div>
+      <div class="prio-legend" id="prioLegend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="blk blk-mx" data-blk="mx">
+  <div class="blk-head">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
+    <div class="blk-title">Кто чем занят: раздел × ответственный</div>
+    <div class="blk-hint">нажмите на клетку, чтобы отфильтровать</div>
+    <span class="blk-toggle">Свернуть ▲</span>
+  </div>
+  <div class="blk-body">
+    <div class="mx-scroll"><table class="mx" id="matrix"></table></div>
+    <div class="mx-legend">
+      <span><i class="lg over"></i>есть просроченные</span>
+      <span><i class="lg attn"></i>требует решения акционера</span>
+      <span class="mx-legend-note">насыщенность клетки — больше задач</span>
+    </div>
+  </div>
+</div>
+
+<div class="blk blk-tl" data-blk="tl">
+  <div class="blk-head">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+    <div class="blk-title">Сроки</div>
+    <div class="blk-hint">нажмите на задачу, чтобы открыть её</div>
+    <span class="blk-toggle">Свернуть ▲</span>
+  </div>
+  <div class="blk-body">
+    <div class="view-toggle" id="tlToggle">
+      <button data-view="weeks" class="active">Недели</button>
+      <button data-view="gantt">График</button>
+    </div>
+    <div id="viewWeeks">
+      <div class="timeline-scroll" id="timelineScroll"></div>
+    </div>
+    <div id="viewGantt" style="display:none;">
+      <div class="g-scroll"><div class="gantt" id="ganttChart"></div></div>
+      <div class="g-legend" id="ganttLegend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="blk exec blk-exec" id="execBlock">
+  <div class="blk-head exec-head" id="execHead">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v3M12 18v3M4.2 7.2l2.1 2.1M17.7 14.7l2.1 2.1M3 12h3M18 12h3M4.2 16.8l2.1-2.1M17.7 9.3l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg></span>
+    <div class="blk-title exec-title">Ключевые изменения за 2 недели</div>
+    <div class="blk-hint">27 августа – 10 сентября</div>
+    <span class="blk-toggle exec-toggle" id="execToggleLabel">Свернуть ▲</span>
+  </div>
+  <ul class="exec-list">
+    <li><b>Аудит HR-функции вышел на финал</b> — Дмитрий провёл разбор по итогам интервью с менеджерами, 7 сентября получил комментарии от Владлены и подготовил план с приоритетными инициативами. Останется дополнить после разговора с Марко.</li>
+    <li><b>Инвентаризация HR-систем завершена</b> — собран реестр из 64 уникальных процессов (из 100 исходных), подготовлены критерии с весами, балльная оценочная матрица с рекомендациями «сохранить / доработать / заменить» и карта зон неэффективности. На 8 и 15 сентября назначены демонстрации трёх HRM-сервисов: hrdevelopment.ru, HR-box и «МояКоманда».</li>
+    <li><b>Задача «Улучшения по итогам аудита» снята с паузы</b> — Дмитрий доработал по комментариям, на этой неделе на рассмотрении у Владлены, на следующей — звонок с HR и показ Роману.</li>
+    <li><b>Инициатива buddy подтверждена акционером</b> — Роман согласовал презентацию и инициативы, запуск идёт постепенно через менеджеров и бадди, программа добавляется в план обучения и развития.</li>
+    <li><b>Welcome pack дошёл до финального выбора</b> — остановились на белой матовой фарфоровой кружке Rita от Illan-gifts с нанесением одной из ценностей; с ИТ нужно согласовать размер футляра для ноутбука (предварительно 13 диагональ). От подрядчика prezentum.pro решено отказаться из-за срывов сроков.</li>
+    <li><b>Увольнение Константина Г. движется по плану</b> — вручены уведомления за прогул и за игру в рабочее время, по обоим получены пояснения. Дисциплинарное взыскание согласовывается с юристами и выдаётся в ближайшие дни, уведомление по коммерческой тайне — на следующей неделе.</li>
+    <li><b>Дашборд по рекрутменту меняет платформу</b> — после просмотра прототипа договорились на этой неделе протестировать «Поток»: перенести туда информацию, убрать лишние статус-таблицы и залинковать дашборд на выгрузки.</li>
+    <li><b>Подбор в Сингапур</b> — юристы: 3 кандидата, один на паузе; финансисты: 3 на интервью. По внутренним кандидатам (5 человек) подготовлен слайд, ждём мотивационные письма.</li>
+    <li><b>Кампания по ценностям</b> — 4 сентября проведён тренинг на английском для зарубежных юрисдикций. Дальнейшие шаги обсудим на следующей неделе, когда Лилиана выйдет из отпуска.</li>
+    <li><b>Анализ эффективности сотрудников сдвинулся</b> — в активной стадии с 4 сентября, 9 сентября проведён вводный звонок с Дмитрием.</li>
+    <li><b>Опрос вовлечённости</b> — на 14 сентября назначена калибровочная сессия: конверсия в сравнении с прошлыми отчётами, обработка результатов, обратная связь сотрудникам «было — стало», пост-сессия команды HR.</li>
+    <li><b>Награждение сотрудников 2025 закрыто по существу</b> — награды вручены всем, посты с поздравлением выложены на канал 28 августа.</li>
+    <li><b>Политика по обучению и развитию переработана</b> — 3 сентября направлена новая версия: добавлен блок компетенций, удалено 6 обобщённых слайдов. Слайд по приоритетным направлениям на 2026/2027 требует совместного обсуждения.</li>
+    <li><b>DLP-мониторинг</b> — с Пашей Ф. договорились об автоматизации таблицы посещаемости; подключение точечное по запросу, всего 25 лицензий.</li>
+  </ul>
+  <div class="exec-subtitle">⚠ Риски и внимание</div>
+  <ul class="exec-list risks">
+    <li><b>Состав отчёта изменился</b> — Владлена сняла метку «Priority for RE» со справки по неотгулянным отпускам, задача выбыла из отчёта. Добавился аудит и анализ HR-систем / HRM решения — новая задача с этой меткой. Всего в отчёте 26 задач.</li>
+    <li><b>Просроченных задач нет</b> — Николай Б. был единственной просрочкой, 10 сентября срок перенесён на 17-е. Взято на контроль: с сентября стоимость директорских в UK должна снизиться.</li>
+    <li><b>Постановка целей 2026 фактически закрыта</b> — цели согласованы с менеджерами и направлены Роману 9 сентября, сроки в Todoist сняты. Остались два хвоста: поделиться с Уланом схемой сбора обратной связи от клиентов в московском офисе и получить от Фёдора статистику по collection ratio.</li>
+    <li><b>Флаг «требует решения акционера» снят</b> с награждения 2025 — задач, ждущих решения Романа, сейчас нет.</li>
+    <li><b>Повторная обратная связь по услугам</b> — нет обновлений с 13 августа при крайнем сроке 24 сентября.</li>
+    <li><b>Юристы — Подбор</b> — задача заведена 26 августа, ни одного комментария и ни одного срока.</li>
+    <li><b>Пик нагрузки 17 сентября</b> — на эту дату приходится промежуточный срок сразу по 11 задачам.</li>
+  </ul>
+</div>
+
+<div class="controls">
+  <div class="pills" id="sectionPills"></div>
+  <div class="search-box">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6472" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Поиск по задаче или ответственному…">
+  </div>
+  <select class="selectctl" id="dueFilter">
+    <option value="all">Все сроки</option>
+    <option value="overdue">Просрочено</option>
+    <option value="today">Сегодня</option>
+    <option value="week">На этой неделе</option>
+    <option value="month">В этом месяце</option>
+    <option value="none">Без срока</option>
+  </select>
+  <button class="chip" id="attnFilterBtn" style="border-color:var(--navy-deep);color:var(--navy-deep);">❗ Требует решения акционера</button>
+  <select class="selectctl" id="priorityFilter">
+    <option value="all">Все приоритеты</option>
+    <option value="1">Высокий</option>
+    <option value="2">Средний</option>
+    <option value="3">Низкий</option>
+    <option value="4">Без флажка</option>
+  </select>
+  <select class="selectctl" id="ownerFilter">
+    <option value="all">Все ответственные</option>
+  </select>
+  <button class="chip" id="expandAllBtn" type="button">⤢ Развернуть все</button>
+  <button class="chip reset" id="resetBtn" type="button" style="display:none;">✕ Сбросить фильтры</button>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="blk blk-team" data-blk="team">
+  <div class="blk-head">
+    <span class="blk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+    <div class="blk-title">Структура команды</div>
+    <div class="blk-hint">нажмите на сотрудника, чтобы отфильтровать</div>
+    <span class="blk-toggle">Свернуть ▲</span>
+  </div>
+  <div class="blk-body">
+  <div class="team-grid">
+    <div class="team-card" data-owner="vladlena">
+      <div class="team-avatar"><img src="data:image/jpeg;base64,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" alt="Владлена Буреева"></div>
+      <div>
+        <div class="team-name">Владлена Буреева</div>
+        <div class="team-role">Глава HR направления</div>
+      </div>
+    </div>
+    <div class="team-card" data-owner="dmitry">
+      <div class="team-avatar"><img src="data:image/jpeg;base64,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" alt="Дмитрий Крысько"></div>
+      <div>
+        <div class="team-name">Дмитрий Крысько</div>
+        <div class="team-role">HR проектный директор</div>
+      </div>
+    </div>
+    <div class="team-card" data-owner="liliana">
+      <div class="team-avatar"><img src="data:image/jpeg;base64,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" alt="Лилиана Ислуева"></div>
+      <div>
+        <div class="team-name">Лилиана Ислуева</div>
+        <div class="team-role">HR директор</div>
+      </div>
+    </div>
+    <div class="team-card" data-owner="aelita">
+      <div class="team-avatar"><img src="data:image/jpeg;base64,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" alt="Аэлита Белай"></div>
+      <div>
+        <div class="team-name">Аэлита Белай</div>
+        <div class="team-role">Менеджер по онбордингу</div>
+      </div>
+    </div>
+    <div class="team-card" data-owner="vladlena">
+      <div class="team-avatar"><img src="data:image/jpeg;base64,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" alt="Ксения Ижицкая"></div>
+      <div>
+        <div class="team-name">Ксения Ижицкая</div>
+        <div class="team-role">Менеджер по рекрутменту</div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<button id="toTop" type="button" title="Наверх">↑</button>
+
+<footer>
+  <span>Whitecliff Group · HR</span>
+  <span>Клик по карточке — описание, статус и история</span>
+</footer>
+
+<script>
+
+(function(){
+  var PW = 'hr2026';
+  var scr = document.getElementById('password-screen');
+  var inp = document.getElementById('pw-input');
+  var btn = document.getElementById('pw-submit');
+  var err = document.getElementById('pw-error');
+  function unlock(){ scr.style.display='none'; }
+  function check(){
+    if(inp.value === PW){
+      try{ sessionStorage.setItem('hrStatusAuth','1'); }catch(e){}
+      unlock();
+    } else {
+      err.textContent = 'Неверный пароль';
+      inp.value=''; inp.focus();
+    }
+  }
+  try{ if(sessionStorage.getItem('hrStatusAuth')==='1'){ unlock(); } }catch(e){}
+  btn.addEventListener('click', check);
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ check(); } });
+  if(scr.style.display!=='none'){ setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 60); }
+})();
+
+const TODAY = new Date("2026-09-10T00:00:00");
+const TODAY_ISO = "2026-09-10";
+
+const PEOPLE = {
+  "liliana": {name:"Лилиана Ислуева", initials:"ЛИ", color:"#001F5F"},
+  "dmitry": {name:"Дмитрий Крысько", initials:"ДК", color:"#41618F"},
+  "aelita": {name:"Аэлита Белай", initials:"АБ", color:"#6D7FE8"},
+  "ksenia": {name:"Ксения Ижицкая", initials:"КИ", color:"#5E8A6C"},
+  "vladlena": {name:"Владлена Буреева", initials:"ВБ", color:"#7E6BA8"}
+};
+
+const SECTIONS = [
+  {key:"strategy", name:"Стратегия и бюджет"},
+  {key:"hradmin", name:"Кадровое администрирование и комплаенс"},
+  {key:"performance", name:"Оценка эффективности"},
+  {key:"cb", name:"Компенсации, мотивация и удержание"},
+  {key:"ld", name:"Обучение и развитие"},
+  {key:"culture", name:"Корпоративная культура и коммуникации"},
+  {key:"recruitment", name:"Подбор персонала"},
+  {key:"onboarding", name:"Адаптация и увольнение сотрудников"},
+  {key:"automation", name:"Автоматизация HR"}
+];
+
+const TASKS = [
+  {
+    id:"6h5WV8ffh4XHPxhg", title:"Аудит HR функции",
+    section:"strategy", owner:"dmitry", priority:3,
+    due:"2026-09-17", deadline:"2026-09-17", addedAt:"2026-07-14", needAction:false,
+    description:"Структурированный аудит HR-функции: интервью с ключевыми стейкхолдерами, gap-анализ относительно стадии развития Группы, инвентаризация HR-систем и приоритизированный план улучшений.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Дима провёл разбор по результатам интервью с менеджерами, дополним после разговора с Марко. Подготовлен план с приоритетными инициативами по результатам"},
+    history:[{author:"Дмитрий Крысько", date:"2026-09-08", text:"07.09 от Владлены получены комментарии и обратная связь. Взял в работу"}, {author:"Дмитрий Крысько", date:"2026-09-07", text:"Развёрнутые комментарии по итогам пост-обсуждения инициатив"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Дима дорабатывает результаты по комментариям Владлены: верификация оценок с оценщиками, учёт текущих потребностей и статуса развития бизнеса, подтверждение рисков погружением в практику, приоритизация рекомендаций. Рекомендации на рассмотрении у Владлены от 25 августа"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Дмитрий провёл интервью с ключевыми сотрудниками. Назначена внутренняя встреча с Владленой для обсуждения промежуточных выводов"}],
+    url:"https://app.todoist.com/app/task/6h5WV8ffh4XHPxhg"
+  },
+  {
+    id:"6cvGXx2xcMqXvqVH", title:"Повторная обратная связь по услугам",
+    section:"strategy", owner:"liliana", priority:3,
+    due:"2026-09-17", deadline:"2026-09-24", addedAt:"2025-09-17", needAction:false,
+    description:"Повторный сбор обратной связи от клиентов по услугам и направлениям деятельности WIM с последующим сравнительным анализом улучшений.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-13", text:"Запущен сбор повторной обратной связи, напоминаем коллегам о необходимости пройти опрос"},
+    history:[{author:"Лилиана Ислуева", date:"2026-01-15", text:"Составлен гугл-опрос и направлен клиентам на заполнение"}],
+    url:"https://app.todoist.com/app/task/6cvGXx2xcMqXvqVH"
+  },
+  {
+    id:"6hGpg5R2GhrRrqq8", title:"Интеграция КЗ в глобальные практики",
+    section:"hradmin", owner:"liliana", priority:1,
+    due:"2026-09-17", deadline:"2026-11-26", addedAt:"2026-08-14", needAction:false,
+    description:"Интеграция казахстанского подразделения (WBS KZ) в глобальные HR-практики и процессы группы.",
+    current:{author:"Владлена Буреева", date:"2026-08-27", text:"Со следующей недели забираем Verum и начинаем процесс по внедрению 1С ЗУП"},
+    history:[{author:"Владлена Буреева", date:"2026-08-20", text:"Передали WBS KZ, восстанавливаем должностные инструкции. Verum — передаём на 1-й неделе сентября. С 1 сентября внедряем 1С ЗУП, проводим тендер интеграторов. Договоры на обслуживание составлены, Лиза подпишет в сентябре задним числом с 1 июля"}],
+    url:"https://app.todoist.com/app/task/6hGpg5R2GhrRrqq8"
+  },
+  {
+    id:"6hCx946C9PRgm9Jg", title:"Справка по штрафам в КЗ",
+    section:"hradmin", owner:"liliana", priority:2,
+    due:"2026-09-25", deadline:null, addedAt:"2026-08-06", needAction:false,
+    description:"Подготовка справки по штрафам по итогам проверки кадрового делопроизводства компании WBS в Казахстане.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-27", text:"Замечания, которые можно устранить без штрафа — корректируются, документы восстанавливаются по данным enbek.kz. Грубые нарушения вынесем в отдельную справку. С 31 августа начинаем передачу дел по Verum, ориентировочная дата заключения — 25 сентября"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-13", text:"Ожидаю окончательного заключения по итогам проверки компании WBS"}],
+    url:"https://app.todoist.com/app/task/6hCx946C9PRgm9Jg"
+  },
+  {
+    id:"6h5pJ2Gf4qhfg5pg", title:"Николай Б. — директорство",
+    section:"hradmin", owner:"vladlena", priority:3,
+    due:"2026-09-17", deadline:null, addedAt:"2026-07-15", needAction:false,
+    description:"Решение по директорству Николая Б. в WBS UK и WBS KZ с учётом комплаенс-требований (статус ACCA/FCCA, KYC/AML) и планов по преемственности.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Надо проконтролировать, что с сентября стоимость директорских в UK снизится"},
+    history:[{author:"Владлена Буреева", date:"2026-08-31", text:"Лиза обсуждает с Николаем сокращение оклада в WBS UK"}, {author:"Владлена Буреева", date:"2026-08-27", text:"Владлена направит сегодня справку Роману"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Подготовлена справка с внутренними предложениями по дальнейшим шагам, ожидалось обсуждение с Еленой"}, {author:"Лилиана Ислуева", date:"2026-07-23", text:"Рекомендация: сохранить Николая директором WBS UK; по WBS KZ — временно сохранить, рассмотреть Оксану Б. как и.о. после испытательного срока (конец сентября)"}],
+    url:"https://app.todoist.com/app/task/6h5pJ2Gf4qhfg5pg"
+  },
+  {
+    id:"6hMfjp697MX3Q3Rg", title:"Увольнение Константина Г.",
+    section:"hradmin", owner:"liliana", priority:3,
+    due:"2026-09-17", deadline:"2026-10-01", addedAt:"2026-08-26", needAction:false,
+    description:"Процедура увольнения сотрудника с учётом рисков информационной безопасности.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Выдали уведомление за прогул — получили пояснения по больничному. Выдали уведомление за игру в рабочее время — тоже получили пояснения. Дисциплинарное взыскание обсудить с юристами, планируем выдать сегодня-завтра. Второе уведомление (за нарушение коммерческой тайны) планируем вручить на следующей неделе"},
+    history:[{author:"Владлена Буреева", date:"2026-09-03", text:"Получили от Константина обоснование, что был на больничном — проверяем. Получили запрос по инициированию расследования. Следующее уведомление направляем в понедельник"}, {author:"Лилиана Ислуева", date:"2026-08-28", text:"28.08 вручили первое уведомление о необходимости дать письменное объяснение по факту использования рабочего времени и техники"}, {author:"Лилиана Ислуева", date:"2026-08-27", text:"Переговорили с юристами и командой безопасности. Определён план действий: начинаем направлять уведомления для предоставления письменных объяснений — увольнение по статье"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Михаил и Владислав провели разговор с Константином, не готов увольняться самостоятельно. Владислав с ИТ ограничили доступ к чувствительным файлам и использование ИИ"}],
+    url:"https://app.todoist.com/app/task/6hMfjp697MX3Q3Rg"
+  },
+  {
+    id:"6ggw89r4R82QfFGg", title:"Промежуточная оценка 2026",
+    section:"performance", owner:"liliana", priority:1,
+    due:null, deadline:"2026-09-17", addedAt:"2026-05-21", needAction:false,
+    description:"Промежуточный performance review за 2026 год: цикл 360 и самооценки в SI, интеримы по топ-менеджменту и ключевым сотрудникам.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-28", text:"Все письма по РФ контуру направлены. Направила письма Сауле и Динаре. На согласовании письма по репортингу КЗ"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-27", text:"Письма по повышениям подготовлены и направлены на почту 25.08"}, {author:"Владлена Буреева", date:"2026-08-26", text:"По интерим-оценке: на будущее меняем процесс — бонус выплачивается если сотрудник взял больше ответственности за год. Согласованы повышения по Олегу, Лизе, Жене (EMEA), Елене К., WBS KZ, Насте Н., Николаю, Лилиане, Сауле, Динаре. Не согласованы: Сергей, Павел, Настя Х., Венера, Алина, Айдана — запрошены уточнения"}, {author:"Лилиана Ислуева", date:"2026-08-13", text:"Проверила цели, поставленные коллегами на год, запросила корректировки"}],
+    url:"https://app.todoist.com/app/task/6ggw89r4R82QfFGg"
+  },
+  {
+    id:"6g9hff2VM6wRpj48", title:"Постановка целей 2026",
+    section:"performance", owner:"vladlena", priority:4,
+    due:null, deadline:null, addedAt:"2026-03-17", needAction:false,
+    description:"Каскадирование корпоративных и индивидуальных целей на 2026 год по всем офисам группы через систему Small Improvements (SI).",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Владлена провела переговоры с менеджерами, показала обновлённые цели, комментарии менеджеров доработаны, направлены Роману 9 сентября — все согласованы. Нужно: (1) поделиться с Уланом информацией, как организуем сбор обратной связи от клиентов в московском офисе; (2) собрать статистику по collection ratio — запрос направлен Фёдору 9 сентября"},
+    history:[{author:"Владлена Буреева", date:"2026-08-27", text:"Владлена направит сегодня обновлённые цели Роману и в понедельник — менеджерам"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Проведена встреча с Романом 24 августа, презентация по топ-менеджерам дорабатывается на этой неделе, далее нужно обсудить с менеджерами и внести в SI"}, {author:"Лилиана Ислуева", date:"2026-04-09", text:"Gelion — цели внесены; HR RU — внесены; WBS KZ — требуется пролонгация срока постановки"}],
+    url:"https://app.todoist.com/app/task/6g9hff2VM6wRpj48"
+  },
+  {
+    id:"6h5WWxPmWMR349Rg", title:"Оценка ключевых сотрудников",
+    section:"performance", owner:"dmitry", priority:1,
+    due:"2026-09-16", deadline:"2026-10-15", addedAt:"2026-07-14", needAction:false,
+    description:"Оценка мотивации, вовлечённости и управленческого потенциала ключевых сотрудников (топ-10) через Clifton Strengths, Hogan и 360-опрос.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Дима встретится с Лилианой по статусу последней оценки топов для интеграции в опрос 360"},
+    history:[{author:"Владлена Буреева", date:"2026-08-27", text:"На следующей неделе нужно запустить 360"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Дима дополнил презентацию, добавил слайд по Улану, Владлена вышлет Роману до 27 августа"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Дмитрий подготовил проект анализа по результатам Clifton. Встреча с Владленой 17 августа, финальная версия — Роману"}],
+    url:"https://app.todoist.com/app/task/6h5WWxPmWMR349Rg"
+  },
+  {
+    id:"6gvhggV6h6Hrfrf8", title:"Анализ эффективности сотрудников",
+    section:"performance", owner:"dmitry", priority:2,
+    due:"2026-09-17", deadline:"2026-10-08", addedAt:"2026-06-19", needAction:false,
+    description:"Анализ подхода к оценке эффективности (KPI/метрики). Сводный файл по сотрудникам: утилизация, окупаемость, посещаемость, оценка 360. Выводы по отклонениям и планы улучшений.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Провели с Димой вводный звонок 09 сентября"},
+    history:[{author:"Дмитрий Крысько", date:"2026-09-07", text:"В активной стадии с 04.09"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Дима, по этой задаче надо обсудить статус — пока не понимаю прогресс"}, {author:"Владлена Буреева", date:"2026-07-14", text:"Подготовлен файл со списком сотрудников. Следующие шаги: добавить годовую оценку из SI, посещаемость, утилизацию, прибыль по командам, распределение дивидендов на FTE"}],
+    url:"https://app.todoist.com/app/task/6gvhggV6h6Hrfrf8"
+  },
+  {
+    id:"6g9hfCvghxQ4q6Qg", title:"Награждение сотрудников 2025",
+    section:"performance", owner:"liliana", priority:4,
+    due:null, deadline:null, addedAt:"2026-03-17", needAction:false,
+    description:"Награждение сотрудников по итогам 2025 года: вручение подарков и статуэток по номинациям.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-28", text:"Выложила посты с поздравлением на канал. Всем вручили награды"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-17", text:"Я связалась с Арзу, она скоординируется с Еленой Д. и передаст приз для вручения Марко"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Призы вручены Кате, Еве, Ерсайыну, Олегу и Лизе. Остался Марко — подарок будет передан Роману после 23 августа (Елена Д.)"}],
+    url:"https://app.todoist.com/app/task/6g9hfCvghxQ4q6Qg"
+  },
+  {
+    id:"6hMfjgRHw5j7C8j8", title:"Рекомендации к DLP-проверке",
+    section:"performance", owner:"liliana", priority:3,
+    due:"2026-09-30", deadline:null, addedAt:"2026-08-26", needAction:false,
+    description:"Рекомендации по итогам DLP-проверки на основе данных о посещаемости и учёта рабочего времени.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-28", text:"Провели встречу с Пашей Ф.: настроят автоматизацию таблицы посещаемости для мониторинга. По итогам ежемесячной проверки будем направлять безопасности информацию о необходимости мониторинга DLP. Всего 25 лицензий, подключение точечное — по запросу"},
+    history:[],
+    url:"https://app.todoist.com/app/task/6hMfjgRHw5j7C8j8"
+  },
+  {
+    id:"6Rr4Vh3jrjgFGrCg", title:"Опрос вовлечённости сотрудников",
+    section:"cb", owner:"liliana", priority:3,
+    due:"2026-09-17", deadline:"2026-09-24", addedAt:"2024-03-14", needAction:false,
+    description:"Повторное исследование вовлечённости сотрудников для оценки прогресса внедрённых инициатив и планирования новых шагов.",
+    current:{author:"Дмитрий Крысько", date:"2026-09-08", text:"14.09 калибровочная сессия по итогам исследования: конверсия и сравнение с предыдущими отчётами, сроки, обработка результатов и пост-работа, обратная связь сотрудникам «было — стало», ответы на открытые вопросы, пост-сессия команды HR"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-26", text:"Опрос открыт на всех сотрудников 21 августа"}, {author:"Владлена Буреева", date:"2026-08-26", text:"Лилиана запустила опрос 21 августа на всех сотрудников"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Лилиана прислала проект опроса 6 августа, дорабатывает по внутренним комментариям. Дальнейшие шаги: согласовать вопросы и запустить опрос в SI/Google формах"}, {author:"Владлена Буреева", date:"2026-07-15", text:"Предложено запланировать повторный опрос вовлечённости, чтобы отследить улучшения после внедрённых инициатив"}],
+    url:"https://app.todoist.com/app/task/6Rr4Vh3jrjgFGrCg"
+  },
+  {
+    id:"69mGm29386Rjxqq8", title:"Сравнение зарплат с рынком по всем юрисдикциям",
+    section:"cb", owner:"ksenia", priority:3,
+    due:"2026-09-24", deadline:"2026-10-30", addedAt:"2023-03-09", needAction:false,
+    description:"Регулярное сравнение уровня заработных плат компании с рыночными показателями по всем юрисдикциям присутствия группы.",
+    current:{author:"Ксения Ижицкая", date:"2026-08-20", text:"Задача передана Ксении при обновлении команды HR"},
+    history:[{author:"Надежда Фролова", date:"2026-08-20", text:"Обсудили на статусе старт проведения анализа рынка труда. Задача передана Ксении"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Надя, подходит сентябрь — для сверки зарплат с рынком. Предлагаю подключить Ксению для сбора обзоров по нашим данным и рекрутерам"}],
+    url:"https://app.todoist.com/app/task/69mGm29386Rjxqq8"
+  },
+  {
+    id:"6hMfmCJqcq8q9hmg", title:"Мотивация Улана",
+    section:"cb", owner:"liliana", priority:3,
+    due:"2026-09-17", deadline:null, addedAt:"2026-08-26", needAction:false,
+    description:"Разработка мер по повышению мотивации и командного духа Улана, усиление клиентоориентированности.",
+    current:{author:"Лилиана Ислуева", date:"2026-08-26", text:"В работу принята задача по мотивации Улана — планируется личный разговор"},
+    history:[{author:"Владлена Буреева", date:"2026-08-26", text:"Поговорить с Уланом по душам, что можем сделать для улучшения его мотивации, усиления духа команды, повышения клиентоориентированности"}],
+    url:"https://app.todoist.com/app/task/6hMfmCJqcq8q9hmg"
+  },
+  {
+    id:"6gRPcGxVJFHm424g", title:"План тренингов и семинаров на 2026 год",
+    section:"ld", owner:"dmitry", priority:2,
+    due:"2026-09-17", deadline:"2026-09-24", addedAt:"2026-04-23", needAction:false,
+    description:"Годовой план обучения и развития: тренинги по компетенциям, ИИ-инструментам, коммуникациям и проектному управлению для разных грейдов сотрудников.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Дима дорабатывает комментарии от 7 сентября"},
+    history:[{author:"Дмитрий Крысько", date:"2026-09-03", text:"Отправлена переработанная презентация «Политика по обучению и развитию»: добавлен блок компетенций, удалено 6 обобщённых слайдов, добавлены текущие подходы и реализованные тренинги. Слайд по приоритетным направлениям на 2026/2027 требует совместного обсуждения"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Дмитрий подготовил презентацию по подходам к обучению и развитию, обсудили 13 августа. Дополняем: календарь тренингов, матрица компетенций, карьерные коучи"}, {author:"Дмитрий Крысько", date:"2026-07-31", text:"В процессе изучения документации и подходов"}],
+    url:"https://app.todoist.com/app/task/6gRPcGxVJFHm424g"
+  },
+  {
+    id:"6XpQR2fWF2FJPJ4g", title:"Кампания по ценностям",
+    section:"culture", owner:"liliana", priority:2,
+    due:"2026-09-17", deadline:"2026-10-29", addedAt:"2025-04-21", needAction:false,
+    description:"Кампания по внедрению корпоративных ценностей: обновление onboarding-материалов, постеры, видеоролик, семинары по офисам.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Проведён тренинг на английском языке для зарубежных юрисдикций 4 сентября. По возвращении Лилианы из отпуска на следующей неделе нужно обсудить дальнейшие шаги по кампании"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-27", text:"Проведён первый тренинг по кампании ценностей для России и Казахстана"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Лилиана назначила на 18 августа семинар для России и Казахстана с Михаилом, через неделю — для европейского контура"}, {author:"Владлена Буреева", date:"2026-06-11", text:"Напомнить про миссию коллегам"}],
+    url:"https://app.todoist.com/app/task/6XpQR2fWF2FJPJ4g"
+  },
+  {
+    id:"6h4gV26HJg4xrfX8", title:"Онлайн тимбилдинг",
+    section:"culture", owner:"liliana", priority:3,
+    due:"2026-09-16", deadline:"2026-10-01", addedAt:"2026-07-10", needAction:false,
+    description:"Организация онлайн корпоративного мероприятия (тимбилдинг) для сотрудников группы.",
+    current:{author:"Владлена Буреева", date:"2026-09-04", text:"По стоимости важно добавить хотя бы индикатив, убрать акцент на изменениях с прошлого раза — презентацию в итоге отправим Роману. Дальше вышлем Елене, соберём подтверждение"},
+    history:[{author:"Лилиана Ислуева", date:"2026-08-28", text:"Вынесла текущие вопросы после обновления КП от подрядчиков. Диана вернётся с обновлениями"}, {author:"Лилиана Ислуева", date:"2026-08-27", text:"Направили комментарии подрядчикам, 1 подрядчик вернулся с обратной связью, ожидаем от остальных"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Лилиана получила предложения от 3 организаторов, направила на внутреннее рассмотрение 6 августа"}, {author:"Лилиана Ислуева", date:"2026-08-06", text:"Информация направлена на почту"}],
+    url:"https://app.todoist.com/app/task/6h4gV26HJg4xrfX8"
+  },
+  {
+    id:"6gVqHxgc56gVf6W8", title:"Дашборд по рекрутменту",
+    section:"recruitment", owner:"ksenia", priority:1,
+    due:"2026-09-15", deadline:"2026-10-22", addedAt:"2026-04-29", needAction:false,
+    description:"Разработка дашборда по подбору персонала с фокусом на ключевые позиции для акционера.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Посмотрели прототип — договорились на этой неделе потестировать «Поток», чтобы проверить, как перенести туда всю информацию, избавиться от лишних статус-таблиц и залинковать дашборд на выгрузки"},
+    history:[{author:"Ксения Ижицкая", date:"2026-08-14", text:"Дашборд в разработке — акцент для акционера на ключевые позиции"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Разработан проект дашборда, дополняется по внутренним комментариям, со следующего еженедельного звонка — статус по нему. Акцент для акционера: CEO Северные, казначейство и инвестиции, юристы к Улану, проектные менеджеры к Азамату, Алия в ОАЭ"}],
+    url:"https://app.todoist.com/app/task/6gVqHxgc56gVf6W8"
+  },
+  {
+    id:"6hMgC2wqmHpPxc6g", title:"Сингапур — Подбор",
+    section:"recruitment", owner:"ksenia", priority:1,
+    due:null, deadline:null, addedAt:"2026-08-26", needAction:false,
+    description:"Подбор персонала для офиса в Сингапуре.",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Юристы — 3 человека, 1 на паузе. Финансисты — 3 на интервью. Владлена подготовила слайд по внутренним кандидатам (5 человек), ждём мотивационные письма"},
+    history:[],
+    url:"https://app.todoist.com/app/task/6hMgC2wqmHpPxc6g"
+  },
+  {
+    id:"6hMgC4jj56qH6j2g", title:"Юристы — Подбор",
+    section:"recruitment", owner:"ksenia", priority:1,
+    due:null, deadline:null, addedAt:"2026-08-26", needAction:false,
+    description:"Подбор персонала для юридической команды.",
+    current:null,
+    history:[],
+    url:"https://app.todoist.com/app/task/6hMgC4jj56qH6j2g"
+  },
+  {
+    id:"6gcWqm55VWvF6fPg", title:"Инициатива с buddy / карьерными лидерами",
+    section:"recruitment", owner:"dmitry", priority:2,
+    due:"2026-09-24", deadline:"2026-11-26", addedAt:"2026-05-11", needAction:false,
+    description:"Программа адаптации новых сотрудников через buddy-систему и карьерных лидеров (наставников).",
+    current:{author:"Владлена Буреева", date:"2026-09-10", text:"Роман подтвердил презентацию и инициативы — будем потихоньку запускать, проговаривать с менеджерами и бадди, добавляем в план обучения и развития"},
+    history:[{author:"Владлена Буреева", date:"2026-08-27", text:"Надежда сегодня пришлёт обновлённую версию, Владлена направит Роману"}, {author:"Владлена Буреева", date:"2026-08-14", text:"Подготовлен проект презентации с номинантами для бадди и карьерных коучей. Надежда Фролова покидает компанию 29 августа — передача дел в процессе"}, {author:"Надежда Фролова", date:"2026-07-21", text:"Отправлены материалы с корректировками от 21.07"}],
+    url:"https://app.todoist.com/app/task/6gcWqm55VWvF6fPg"
+  },
+  {
+    id:"6cJ2X2fQ9XHm54Mg", title:"Обновление приветственного набора для новичков",
+    section:"onboarding", owner:"aelita", priority:2,
+    due:"2026-09-24", deadline:"2026-10-15", addedAt:"2025-07-05", needAction:false,
+    description:"Обновление приветственного набора для новых сотрудников: брендинг, дизайн, подбор подрядчиков по производству мерча.",
+    current:{author:"Аэлита Белай", date:"2026-09-10", text:"Со звонка 10 сентября: кружка — белая матовая фарфоровая модель «Рита», ценности наносим на разные кружки (все 5–6). Чехол для ноутбука остаётся вариант от prezentum.pro: он втрое дороже рынка, но единственный подходит под концепцию — от подрядчика отказываемся как от основного, но эту позицию берём у него. С ИТ согласовать стандартный размер ноутбука (13 диагональ). На следующей неделе запросить у подрядчиков образцы для просмотра в офисе"},
+    history:[{author:"Аэлита Белай", date:"2026-09-10", text:"Договорённости: останавливаемся на кружке фарфоровой матовой Rita, белой, от Illan-gifts, но с нанесением одной из ценностей. С ИТ согласовать размеры футляра для ноутбука, предварительно 13 диагональ"}, {author:"Аэлита Белай", date:"2026-09-10", text:"Работаю с двумя подрядчиками: Illan-gifts разрабатывает КП по текущим позициям и готов направить тестовые позиции без лого; llsr.ru готовит КП. От prezentum.pro предлагаю отказаться — не возвращаются оперативно"}, {author:"Аэлита Белай", date:"2026-09-04", text:"Illan-gifts готовит прайс и уточнения по срокам изготовления. 07.09 обещают вернуться с расчётами на тираж 50 и 100 штук, минимальный порог заказа 200 000 ₽"}, {author:"Владлена Буреева", date:"2026-08-27", text:"Подрядчик не выходит на связь — смотрим новых из списка, который передала Надежда при передаче дел"}, {author:"Надежда Фролова", date:"2026-08-27", text:"Подрядчик (prezentum.pro) не выходит на связь более 2 недель. Данные по альтернативным подрядчикам консолидированы и переданы Лилиане при хендовере"}, {author:"Аэлита Белай", date:"2026-08-20", text:"Оставлен запрос на выпуск пробного набора"}],
+    url:"https://app.todoist.com/app/task/6cJ2X2fQ9XHm54Mg"
+  },
+  {
+    id:"6cJ2X4vXwf2vrPCg", title:"Геймификация онбординга",
+    section:"onboarding", owner:"aelita", priority:2,
+    due:null, deadline:"2026-11-26", addedAt:"2025-07-05", needAction:false,
+    description:"Внедрение элементов геймификации в процесс адаптации новых сотрудников.",
+    current:{author:"Аэлита Белай", date:"2026-09-10", text:"Пообщались с Айданой, сделали наброски. Сейчас продумываю внутреннюю информацию, 10.09 запланировано общение с Сергеем Архиповым по дашборду"},
+    history:[{author:"Аэлита Белай", date:"2026-09-03", text:"Запланирована встреча с Айданой на 7.09"}, {author:"Лилиана Ислуева", date:"2026-08-28", text:"Обсудили с Аэлитой дальнейшую работу: детальный план прохождения онбординга, перечень конфиденциальной информации — с Сергеем. Онбординг выстраиваем по принципу последовательного открытия информации"}, {author:"Владлена Буреева", date:"2026-08-27", text:"Обсудили с Аэлитой на звонке — перенять план, разработанный Надеждой, и попробовать реализовать в Claude без раскрытия чувствительной информации"}],
+    url:"https://app.todoist.com/app/task/6cJ2X4vXwf2vrPCg"
+  },
+  {
+    id:"6hJC9rp8wpfFC26g", title:"Анализ текучести и exit interview",
+    section:"onboarding", owner:"aelita", priority:1,
+    due:"2026-09-17", deadline:"2026-10-08", addedAt:"2026-08-20", needAction:false,
+    description:"Анализ текучести персонала и внедрение процесса exit-интервью для увольняющихся сотрудников.",
+    current:{author:"Аэлита Белай", date:"2026-09-03", text:"По данной задаче совместно с Лилианой планируем посмотреть причины увольнения за 25–26 гг."},
+    history:[{author:"Аэлита Белай", date:"2026-08-27", text:"Аэлита с Димой посмотрели метрики и внесли корректировки. Выгрузили по России уволенных за прошлый год и 2026"}],
+    url:"https://app.todoist.com/app/task/6hJC9rp8wpfFC26g"
+  },
+  {
+    id:"6hQmJhH2MG3CGpj8", title:"Аудит и анализ HR-систем / HRM решения",
+    section:"automation", owner:"dmitry", priority:3,
+    due:null, deadline:"2026-10-29", addedAt:"2026-09-04", needAction:false,
+    description:"Инвентаризация HR-систем и файлов, оценочная матрица (стоимость / функциональность / соответствие целям / риски), зоны неэффективности, выбор HRM-решения.",
+    current:{author:"Дмитрий Крысько", date:"2026-09-08", text:"15.09 в 16:30 — демонстрация сервиса HR-box. 08.09 в 11:00 — демонстрация сервиса hrdevelopment.ru"},
+    history:[{author:"Дмитрий Крысько", date:"2026-09-07", text:"15.09 в 11:00 — демонстрация HR-сервиса «МояКоманда»"}, {author:"Дмитрий Крысько", date:"2026-09-04", text:"Собраны данные по всем HR-направлениям, сформирован реестр из 64 уникальных процессов (из 100 исходных, после вычистки дублей). Подготовлены критерии и веса, оценочная матрица с балльной системой и рекомендациями, карта зон неэффективности"}],
+    url:"https://app.todoist.com/app/task/6hQmJhH2MG3CGpj8"
+  },
+];
+
+function parseDate(s){ if(!s) return null; return new Date(s+"T00:00:00"); }
+function daysDiff(a,b){ return Math.round((a-b)/86400000); }
+function fmtDate(s){ if(!s) return ""; const d=parseDate(s); return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}); }
+
+// Ключевая дата задачи — КРАЙНИЙ срок (deadline в Todoist, вторая дата).
+// Промежуточный срок (due) берём только когда крайний не проставлен.
+function keyDate(task){ return task.deadline || task.due || null; }
+function getDueCategory(task){
+  const kd = keyDate(task);
+  if(!kd) return "none";
+  const diff = daysDiff(parseDate(kd), TODAY);
+  if(diff < 0) return "overdue";
+  if(diff === 0) return "today";
+  if(diff <= 7) return "week";
+  return "month";
+}
+
+const SECTION_META = {
+  strategy:    {c:"#6D7FE8", bg:"#ECEFFC"},
+  hradmin:     {c:"#3E9AC0", bg:"#E4F2F8"},
+  performance: {c:"#8A6FB8", bg:"#F0EAF9"},
+  cb:          {c:"#3FA286", bg:"#E3F4EE"},
+  ld:          {c:"#D07AA0", bg:"#FAEBF2"},
+  culture:     {c:"#C77DBA", bg:"#F8EAF5"},
+  recruitment: {c:"#4F86C7", bg:"#E7EFFA"},
+  onboarding:  {c:"#6FA45C", bg:"#EDF5E8"},
+  automation:  {c:"#5B8FA8", bg:"#E6F0F5"}
+};
+const SECTION_SHORT = {"strategy": "Стратегия", "hradmin": "Кадры", "performance": "Оценка", "cb": "C&B", "ld": "Обучение", "culture": "Культура", "recruitment": "Подбор", "onboarding": "Адаптация", "automation": "Автоматизация"};
+function secShort(k){ return SECTION_SHORT[k] || k; }
+function tint(hex, a){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  const m=v=>Math.round(255 + (v-255)*a);
+  return "rgb("+m(r)+","+m(g)+","+m(b)+")";
+}
+function secColor(k){ return (SECTION_META[k]||{}).c || "#6D7FE8"; }
+function secBg(k){ return (SECTION_META[k]||{}).bg || "#ECEFFC"; }
+function plural(n, one, few, many){
+  const n10=n%10, n100=n%100;
+  if(n10===1 && n100!==11) return one;
+  if(n10>=2 && n10<=4 && (n100<10 || n100>=20)) return few;
+  return many;
+}
+
+const PRIORITY_LABEL = {1:"Высокий",2:"Средний",3:"Низкий",4:"Без флажка"};
+
+let state = { search:"", due:"all", priority:"all", section:"all", owner:"all", attnOnly:false, open:{} };
+
+function populateFilters(){
+  const ownerSel = document.getElementById("ownerFilter");
+  Object.keys(PEOPLE).forEach(key=>{ const opt=document.createElement("option"); opt.value=key; opt.textContent=PEOPLE[key].name; ownerSel.appendChild(opt); });
+}
+
+function isUpdatedToday(task){ return task.current && task.current.date === TODAY_ISO; }
+function isAttention(task){ return !!task.needAction; }
+function taskAgeDays(task){ return daysDiff(TODAY, parseDate(task.addedAt)); }
+function isStale(task){
+  if(taskAgeDays(task) < 14) return false;
+  if(!task.current) return true;
+  return daysDiff(TODAY, parseDate(task.current.date)) > 21;
+}
+
+function renderStats(){
+  const total = TASKS.length;
+  const overdue = TASKS.filter(t=>getDueCategory(t)==="overdue").length;
+  const today = TASKS.filter(t=>getDueCategory(t)==="today").length;
+  const stale = TASKS.filter(isStale).length;
+  const attn = TASKS.filter(isAttention).length;
+  document.getElementById("statsRow").innerHTML = `
+    <div class="stat" data-filter="all"><div class="num">${total}</div><div class="label">Всего задач</div></div>
+    <div class="stat flagged" data-filter="overdue"><div class="num">${overdue}</div><div class="label">Просрочено</div></div>
+    <div class="stat" data-filter="today"><div class="num">${today}</div><div class="label">Срок сегодня</div></div>
+    <div class="stat flagged" data-filter="attn"><div class="num">${attn}</div><div class="label">Решение акционера</div></div>
+    <div class="stat flagged"><div class="num">${stale}</div><div class="label">Давно нет обновлений</div></div>
+  `;
+}
+
+function sectionStats(key){
+  const list = TASKS.filter(t=>t.section===key);
+  return {
+    total:list.length,
+    overdue:list.filter(t=>getDueCategory(t)==="overdue").length,
+    attn:list.filter(isAttention).length,
+    fresh:list.filter(isUpdatedToday).length
+  };
+}
+
+function renderSectionMap(){
+  const bar = document.getElementById("mapBar");
+  const grid = document.getElementById("sectionMap");
+  const total = TASKS.length;
+  bar.innerHTML = SECTIONS.map(sec=>{
+    const st = sectionStats(sec.key);
+    if(!st.total) return "";
+    return `<i data-sec="${sec.key}" style="width:${(st.total/total*100).toFixed(2)}%;background-color:${secColor(sec.key)}" title="${sec.name} — ${st.total}"></i>`;
+  }).join("");
+
+  const maxSec = Math.max.apply(null, SECTIONS.map(x=>sectionStats(x.key).total));
+  grid.innerHTML = SECTIONS.map(sec=>{
+    const st = sectionStats(sec.key);
+    const active = state.section===sec.key ? " active" : "";
+    const flags = [
+      st.overdue ? `<span class="mc-flag over">${st.overdue} просрочено</span>` : "",
+      st.attn ? `<span class="mc-flag attn">${st.attn} акционеру</span>` : "",
+      st.fresh ? `<span class="mc-flag fresh">${st.fresh} обновлено</span>` : ""
+    ].filter(Boolean).join("");
+    return `<div class="map-card${active}" data-sec="${sec.key}" style="--sc:${secColor(sec.key)};--sb:${secBg(sec.key)}">
+      <div class="mc-top">
+        <div class="mc-num">${st.total}</div>
+        <div class="mc-name">${sec.name}</div>
+      </div>
+      <div class="mc-bar"><i style="width:${(st.total/maxSec*100).toFixed(1)}%"></i></div>
+      <div class="mc-flags">${flags || '<span class="mc-flag calm">без отметок</span>'}</div>
+    </div>`;
+  }).join("");
+
+  bar.querySelectorAll("i").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const k = el.getAttribute("data-sec");
+      state.section = (state.section===k) ? "all" : k;
+      render();
+      document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+  grid.querySelectorAll(".map-card").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const k = el.getAttribute("data-sec");
+      state.section = (state.section===k) ? "all" : k;
+      render();
+      const target = document.querySelector(".controls");
+      if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function renderMatrix(){
+  const t = document.getElementById("matrix");
+  const people = Object.keys(PEOPLE).filter(k=>TASKS.some(x=>x.owner===k));
+  let head = '<thead><tr><th class="mx-corner">Ответственный</th>';
+  SECTIONS.forEach(sec=>{
+    head += `<th class="mx-col" data-sec="${sec.key}" title="${sec.name}">
+      <span class="mx-dot" style="background-color:${secColor(sec.key)}"></span>${secShort(sec.key)}</th>`;
+  });
+  head += '<th class="mx-total">Всего</th></tr></thead>';
+
+  let body = '<tbody>';
+  people.forEach(pk=>{
+    const p = PEOPLE[pk];
+    const rowTotal = TASKS.filter(x=>x.owner===pk).length;
+    body += `<tr><th class="mx-row" data-owner="${pk}">
+      <span class="avatar" style="background-color:${p.color}">${p.initials}</span>${p.name}</th>`;
+    SECTIONS.forEach(sec=>{
+      const list = TASKS.filter(x=>x.owner===pk && x.section===sec.key);
+      const n = list.length;
+      const over = list.filter(x=>getDueCategory(x)==="overdue").length;
+      const attn = list.filter(isAttention).length;
+      if(!n){ body += '<td class="mx-cell empty">·</td>'; return; }
+      const active = (state.owner===pk && state.section===sec.key) ? " active" : "";
+      const intensity = Math.min(1, 0.22 + n*0.18);
+      body += `<td class="mx-cell${active}" data-sec="${sec.key}" data-owner="${pk}"
+        style="--cc:${secColor(sec.key)};background-color:${tint(secColor(sec.key), intensity*0.46)}"
+        title="${p.name} · ${sec.name}: ${n}">
+        ${n}${over?'<i class="mx-mark over"></i>':''}${attn?'<i class="mx-mark attn"></i>':''}</td>`;
+    });
+    body += `<td class="mx-total">${rowTotal}</td></tr>`;
+  });
+  body += '<tr class="mx-foot"><th class="mx-row">Всего</th>';
+  SECTIONS.forEach(sec=>{ body += `<td>${TASKS.filter(x=>x.section===sec.key).length}</td>`; });
+  body += `<td class="mx-total">${TASKS.length}</td></tr></tbody>`;
+  t.innerHTML = head + body;
+
+  t.querySelectorAll(".mx-cell[data-sec]").forEach(c=>{
+    c.addEventListener("click", ()=>{
+      const sec=c.getAttribute("data-sec"), own=c.getAttribute("data-owner");
+      if(state.section===sec && state.owner===own){ state.section="all"; state.owner="all"; }
+      else { state.section=sec; state.owner=own; }
+      document.getElementById("ownerFilter").value = state.owner;
+      render();
+      document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+  t.querySelectorAll(".mx-col[data-sec]").forEach(c=>{
+    c.addEventListener("click", ()=>{
+      const k=c.getAttribute("data-sec");
+      state.section = (state.section===k) ? "all" : k;
+      render();
+      document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+  t.querySelectorAll(".mx-row[data-owner]").forEach(c=>{
+    c.addEventListener("click", ()=>{
+      const k=c.getAttribute("data-owner");
+      state.owner = (state.owner===k) ? "all" : k;
+      document.getElementById("ownerFilter").value = state.owner;
+      render();
+      document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+const PRIO_COLOR = {1:"#9C5F5F", 2:"#7E6BA8", 3:"#5E8A6C", 4:"#A9B4C6"};
+function renderPriority(){
+  const bar = document.getElementById("prioBar");
+  const leg = document.getElementById("prioLegend");
+  const counts = [1,2,3,4].map(p=>({p, n:TASKS.filter(t=>t.priority===p).length})).filter(x=>x.n);
+  const total = TASKS.length;
+  bar.innerHTML = counts.map(c=>
+    `<i data-p="${c.p}" style="width:${(c.n/total*100).toFixed(2)}%;background-color:${PRIO_COLOR[c.p]}" title="${PRIORITY_LABEL[c.p]}: ${c.n}"></i>`).join("");
+  leg.innerHTML = counts.map(c=>
+    `<button class="prio-chip${state.priority===String(c.p)?" active":""}" data-p="${c.p}">
+      <span class="pdot" style="background-color:${PRIO_COLOR[c.p]}"></span>${PRIORITY_LABEL[c.p]} <b>${c.n}</b></button>`).join("");
+  const pick = p=>{
+    state.priority = (state.priority===String(p)) ? "all" : String(p);
+    document.getElementById("priorityFilter").value = state.priority;
+    render();
+    document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+  };
+  bar.querySelectorAll("i").forEach(i=>i.addEventListener("click", ()=>pick(i.getAttribute("data-p"))));
+  leg.querySelectorAll(".prio-chip").forEach(i=>i.addEventListener("click", ()=>pick(i.getAttribute("data-p"))));
+}
+
+function renderPills(){
+  const el = document.getElementById("sectionPills");
+  const all = `<button class="pill${state.section==="all"?" active":""}" data-sec="all">Все разделы <b>${TASKS.length}</b></button>`;
+  el.innerHTML = all + SECTIONS.map(sec=>{
+    const st = sectionStats(sec.key);
+    if(!st.total) return "";
+    return `<button class="pill${state.section===sec.key?" active":""}" data-sec="${sec.key}">
+      <span class="pdot" style="background-color:${secColor(sec.key)}"></span>${sec.name} <b>${st.total}</b></button>`;
+  }).join("");
+  el.querySelectorAll(".pill").forEach(p=>{
+    p.addEventListener("click", ()=>{
+      state.section = p.getAttribute("data-sec");
+      render();
+    });
+  });
+}
+
+function renderOwners(){
+  const el = document.getElementById("ownerChart");
+  const rows = Object.keys(PEOPLE).map(k=>({
+    key:k, p:PEOPLE[k],
+    n:TASKS.filter(t=>t.owner===k).length
+  })).filter(r=>r.n>0).sort((a,b)=>b.n-a.n);
+  const max = Math.max.apply(null, rows.map(r=>r.n));
+  el.innerHTML = rows.map(r=>`
+    <div class="owner-row${state.owner===r.key?" active":""}" data-owner="${r.key}">
+      <div class="avatar" style="background-color:${r.p.color}">${r.p.initials}</div>
+      <div class="oname">${r.p.name}</div>
+      <div class="obar"><i style="width:${(r.n/max*100).toFixed(1)}%;background-color:${r.p.color}"></i></div>
+      <div class="ocount">${r.n}</div>
+    </div>`).join("");
+  el.querySelectorAll(".owner-row").forEach(row=>{
+    row.addEventListener("click", ()=>{
+      const k = row.getAttribute("data-owner");
+      state.owner = (state.owner===k) ? "all" : k;
+      const sel = document.getElementById("ownerFilter");
+      if(sel) sel.value = state.owner;
+      render();
+      document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function renderTimeline(){
+  const el = document.getElementById("timelineScroll");
+  let html = "";
+  // окно недель растягиваем так, чтобы поместились все крайние сроки (максимум 14 недель)
+  const keyDates = TASKS.map(keyDate).filter(Boolean).map(parseDate);
+  const maxD = keyDates.length ? new Date(Math.max.apply(null, keyDates)) : TODAY;
+  const weeksNeeded = Math.min(14, Math.max(9, Math.ceil((maxD - TODAY)/(7*86400000)) + 1));
+  const horizonEnd = new Date(TODAY); horizonEnd.setDate(horizonEnd.getDate() + weeksNeeded*7);
+  for(let i=0;i<weeksNeeded;i++){
+    const start = new Date(TODAY); start.setDate(start.getDate()+i*7);
+    const end = new Date(start); end.setDate(end.getDate()+6);
+    const items = [];
+    TASKS.forEach(t=>{
+      if(getDueCategory(t)==="overdue") return;          // просроченные — в отдельной колонке
+      const kd = keyDate(t);                              // ключевая дата = крайний срок
+      if(!kd) return;
+      const d = parseDate(kd);
+      if(d>=start && d<=end) items.push({id:t.id,title:t.title,date:kd,type:t.deadline?"deadline":"due",p:t.priority});
+    });
+    items.sort((a,b)=>parseDate(a.date)-parseDate(b.date));
+    const label = `${start.getDate()}–${end.getDate()} ${end.toLocaleDateString("ru-RU",{month:"short"})}`;
+    html += `<div class="week-col ${i===0?'current':''}">
+      <div class="week-label">${i===0?'Сейчас · ':''}${label}<span class="week-count">${items.length}</span></div>
+      ${items.length ? items.map(it=>`
+        <div class="tl-item ${it.type}" data-id="${it.id}" title="${it.title} — ${it.type==='deadline'?'крайний срок':'срок'} ${fmtDate(it.date)}">
+          <span class="tl-dot p${it.p}"></span>
+          <span>${it.title.length>26?it.title.slice(0,24)+'…':it.title}</span>
+        </div>`).join("") : `<div class="tl-empty">—</div>`}
+    </div>`;
+  }
+  const later = TASKS.filter(t=>{
+    if(getDueCategory(t)==="overdue") return false;
+    const kd = keyDate(t); if(!kd) return false;
+    return parseDate(kd) >= horizonEnd;
+  });
+  if(later.length){
+    html += `<div class="week-col latercol">
+      <div class="week-label">Позже<span class="week-count">${later.length}</span></div>
+      ${later.map(t=>`<div class="tl-item" data-id="${t.id}" title="${t.title} — крайний срок ${fmtDate(keyDate(t))}"><span class="tl-dot p${t.priority}"></span><span>${t.title.length>26?t.title.slice(0,24)+'…':t.title}</span></div>`).join("")}
+    </div>`;
+  }
+  const noDate = TASKS.filter(t=>!keyDate(t));
+  if(noDate.length){
+    html += `<div class="week-col nodatecol">
+      <div class="week-label">Без срока<span class="week-count">${noDate.length}</span></div>
+      ${noDate.map(t=>`<div class="tl-item" data-id="${t.id}" title="${t.title} — срок не установлен"><span class="tl-dot p${t.priority}"></span><span>${t.title.length>26?t.title.slice(0,24)+'…':t.title}</span></div>`).join("")}
+    </div>`;
+  }
+  const overdueItems = TASKS.filter(t=>getDueCategory(t)==="overdue");
+  if(overdueItems.length){
+    const overdueHtml = `<div class="week-col overduecol">
+      <div class="week-label">Просрочено<span class="week-count">${overdueItems.length}</span></div>
+      ${overdueItems.map(t=>`<div class="tl-item overduemark" data-id="${t.id}"><span class="tl-dot p${t.priority}" style="background:var(--red)"></span><span>${t.title.length>26?t.title.slice(0,24)+'…':t.title}</span></div>`).join("")}
+    </div>`;
+    html = overdueHtml + html;
+  }
+  el.innerHTML = html;
+  el.querySelectorAll(".tl-item[data-id]").forEach(it=>{
+    it.addEventListener("click", ()=>{ openTask(it.getAttribute("data-id")); });
+  });
+}
+
+function renderGantt(){
+  const el = document.getElementById("ganttChart");
+  const legend = document.getElementById("ganttLegend");
+  const shown = TASKS.filter(matchesFilters);
+  const dated = shown.filter(t=>t.due || t.deadline);
+  const undated = shown.length - dated.length;
+
+  if(!dated.length){
+    el.innerHTML = '<div class="g-empty">Ни у одной из выбранных задач нет срока</div>';
+    legend.innerHTML = "";
+    return;
+  }
+
+  // границы оси: от начала недели самой ранней даты до конца недели самой поздней
+  const all = [];
+  dated.forEach(t=>{ if(t.due) all.push(parseDate(t.due)); if(t.deadline) all.push(parseDate(t.deadline)); });
+  all.push(new Date(TODAY));
+  let start = new Date(Math.min.apply(null, all));
+  let end   = new Date(Math.max.apply(null, all));
+  start.setDate(start.getDate() - ((start.getDay()+6)%7));           // понедельник
+  end.setDate(end.getDate() + (6 - ((end.getDay()+6)%7)) + 1);        // воскресенье + 1
+  const span = end - start;
+  const weeks = Math.round(span / (7*86400000));
+  const pct = d => ((parseDate2(d) - start) / span * 100);
+
+  // ось: месяцы сверху, недели засечками снизу
+  const MONTHS = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+  let heads = "";
+  let cur = new Date(start);
+  while(cur < end){
+    const mEnd = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+    const segEnd = mEnd < end ? mEnd : end;
+    const w = (segEnd - cur) / span * 100;
+    heads += `<div class="g-month" style="width:${w.toFixed(3)}%">${MONTHS[cur.getMonth()]}</div>`;
+    cur = segEnd;
+  }
+  let ticks = "";
+  for(let i=0;i<weeks;i++){
+    const w = new Date(start); w.setDate(w.getDate()+i*7);
+    const w2 = new Date(w); w2.setDate(w2.getDate()+6);
+    const isNow = (new Date(TODAY) >= w && new Date(TODAY) <= w2);
+    ticks += `<div class="g-week${isNow?' now':''}" style="width:${(100/weeks).toFixed(4)}%">${w.getDate()}</div>`;
+  }
+
+  const rows = dated.slice().sort((a,b)=>{
+    const ka = parseDate2(keyDate(a)), kb = parseDate2(keyDate(b));
+    return ka - kb;
+  });
+
+  const gridBg = `background-image:repeating-linear-gradient(to right, transparent 0, transparent calc(100%/${weeks} - 1px), var(--line) calc(100%/${weeks} - 1px), var(--line) calc(100%/${weeks}));`;
+  const todayPct = ((new Date(TODAY) - start) / span * 100).toFixed(3);
+  const nowMon = new Date(TODAY); nowMon.setDate(nowMon.getDate() - ((nowMon.getDay()+6)%7));
+  const nowLeft = ((nowMon - start) / span * 100).toFixed(3);
+  const nowW = (7*86400000 / span * 100).toFixed(3);
+  const nowBand = `<div class="g-nowband" style="left:${nowLeft}%;width:${nowW}%"></div>`;
+
+  let body = "";
+  rows.forEach(t=>{
+    const over = getDueCategory(t)==="overdue";
+    const col = over ? "#9C5F5F" : secColor(t.section);
+    const d1 = t.due ? pct(t.due) : null;
+    const d2 = t.deadline ? pct(t.deadline) : null;
+    let markHtml = "";
+    if(d1!==null && d2!==null && Math.abs(d2-d1) > 0.4){
+      const l = Math.min(d1,d2), w = Math.abs(d2-d1);
+      markHtml = `<div class="g-bar" style="left:${l.toFixed(3)}%;width:${w.toFixed(3)}%;background-color:${col}"></div>
+        <div class="g-pt due" style="left:${d1.toFixed(3)}%;background-color:${col}"></div>
+        <div class="g-pt dl" style="left:${d2.toFixed(3)}%;border-color:${col}"></div>`;
+    } else {
+      const only = (d2!==null ? d2 : d1);
+      const isDl = (d2!==null);
+      markHtml = `<div class="g-pt ${isDl?'dl':'due'} solo" style="left:${only.toFixed(3)}%;${isDl?('border-color:'+col):('background-color:'+col)}"></div>`;
+    }
+    const tip = t.title + (t.due?` · срок ${fmtDate(t.due)}`:"") + (t.deadline?` · крайний ${fmtDate(t.deadline)}`:"");
+    body += `<div class="g-row${over?' over':''}" data-id="${t.id}" title="${tip}">
+      <div class="g-label"><span class="g-dot" style="background-color:${secColor(t.section)}"></span><span class="g-name">${t.title}</span></div>
+      <div class="g-track" style="${gridBg}">
+        ${nowBand}
+        <div class="g-today" style="left:${todayPct}%"></div>
+        ${markHtml}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = `<div class="g-head">
+      <div class="g-corner">Задача</div>
+      <div class="g-axis">
+        <div class="g-months">${heads}</div>
+        <div class="g-ticks">${ticks}${nowBand}</div>
+        <div class="g-today head" style="left:${todayPct}%"></div>
+        <div class="g-todaytag" style="left:${todayPct}%">сегодня</div>
+      </div>
+    </div>
+    <div class="g-body">${body}</div>`;
+
+  legend.innerHTML = `
+    <span><i class="lg-pt due"></i>промежуточный срок</span>
+    <span><i class="lg-pt dl"></i>крайний срок</span>
+    <span><i class="lg-line"></i>полоса — период между ними</span>
+    <span><i class="lg-today"></i>сегодня, ${fmtDate(TODAY_ISO)}</span>
+    ${undated ? `<span class="g-note">${undated} ${plural(undated,"задача","задачи","задач")} без срока — не на графике</span>` : ""}`;
+
+  el.querySelectorAll(".g-row[data-id]").forEach(r=>{
+    r.addEventListener("click", ()=>openTask(r.getAttribute("data-id")));
+  });
+}
+
+function parseDate2(v){ return (v instanceof Date) ? v : parseDate(v); }
+
+function openTask(id){
+  const task = TASKS.find(t=>t.id===id);
+  if(!task) return;
+  if(!matchesFilters(task)){
+    state.due="all"; state.priority="all"; state.section="all"; state.owner="all";
+    state.attnOnly=false; state.search="";
+    document.getElementById("searchInput").value="";
+    document.getElementById("dueFilter").value="all";
+    document.getElementById("priorityFilter").value="all";
+    document.getElementById("ownerFilter").value="all";
+    document.getElementById("attnFilterBtn").classList.remove("active");
+  }
+  state.open[id]=true;
+  render();
+  const card = document.querySelector('.card[data-id="'+id+'"]');
+  if(card){
+    card.scrollIntoView({behavior:"smooth", block:"center"});
+    card.classList.add("flash");
+    setTimeout(()=>card.classList.remove("flash"), 1400);
+  }
+}
+
+function matchesFilters(task){
+  if(state.attnOnly && !isAttention(task)) return false;
+  if(state.due!=="all" && getDueCategory(task)!==state.due) return false;
+  if(state.priority!=="all" && String(task.priority)!==state.priority) return false;
+  if(state.section!=="all" && task.section!==state.section) return false;
+  if(state.owner!=="all" && task.owner!==state.owner) return false;
+  if(state.search){
+    const q = state.search.toLowerCase();
+    const hay = (task.title+" "+PEOPLE[task.owner].name).toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function hl(text){
+  if(!state.search) return text;
+  const q = state.search.trim();
+  if(!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0) return text;
+  return text.slice(0,i) + '<mark>' + text.slice(i, i+q.length) + '</mark>' + text.slice(i+q.length);
+}
+
+function priorityFlagHTML(p){
+  const flag = p===4 ? "" : `<span class="flagchar p${p}">⚑</span>`;
+  return `<span class="priority-flag">${flag}<span class="priority-label p${p}">${PRIORITY_LABEL[p]}</span></span>`;
+}
+
+function datesBoxHTML(task){
+  const cat = getDueCategory(task);
+  const byDeadline = !!task.deadline;   // статус считаем по крайнему сроку, если он есть
+  let rows = "";
+  if(task.due){
+    const c = byDeadline ? "" : cat;
+    rows += `<div class="date-line"><span class="dot ${byDeadline ? 'none' : cat}"></span><span class="label">Промежуточный срок:</span><span class="value ${c}">${fmtDate(task.due)}</span></div>`;
+  }
+  if(task.deadline){
+    rows += `<div class="date-line deadline"><span class="dot ${cat}"></span><span class="label">Крайний срок:</span><span class="value ${cat}">${fmtDate(task.deadline)}</span></div>`;
+  }
+  if(!task.due && !task.deadline){
+    rows += `<div class="date-line"><span class="dot none"></span><span class="label">Промежуточный срок:</span><span class="value" style="color:var(--grey)">не установлен</span></div>`;
+  }
+  return `<div class="dates-box">${rows}</div>`;
+}
+
+function cardHTML(task){
+  const person = PEOPLE[task.owner];
+  const isOpen = !!state.open[task.id];
+  const stale = isStale(task);
+  const overdue = getDueCategory(task)==="overdue";
+
+  const historyHTML = task.history.map(h=>`
+    <div class="history-item"><div class="detail-text">${h.text}</div><div class="status-meta">${h.author} · ${fmtDate(h.date)}</div></div>`).join("");
+
+  return `
+  <div class="card ${overdue?'overdue':''} ${isOpen?'open':''}" data-id="${task.id}" style="--sc:${secColor(task.section)};${isAttention(task) ? 'border-left-width:4px;' : ''}">
+    <div class="card-top">
+      <h3>${hl(task.title)}</h3>
+      <div class="tag-row">
+        ${overdue ? '<span class="overdue-tag">Просрочено</span>' : ''}
+        ${isAttention(task) ? '<span class="attn-badge">❗ Решение акционера</span>' : ''}
+        ${isUpdatedToday(task) ? '<span class="new-tag">Обновлено сегодня</span>' : ''}
+        ${stale ? '<span class="risk-tag">⚠ Давно нет обновлений</span>' : ''}
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="avatar" data-owner="${task.owner}" title="Показать только задачи этого сотрудника" style="background-color:${person.color}">${person.initials}</div>
+      <span>${person.name}</span>
+    </div>
+    <div class="meta-row">${priorityFlagHTML(task.priority)}</div>
+    ${datesBoxHTML(task)}
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-block">
+          <div class="detail-label">Описание</div>
+          <div class="detail-text">${task.description}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">Текущий статус</div>
+          ${task.current ? `<div class="status-box"><div class="detail-text">${task.current.text}</div><div class="status-meta">${task.current.author} · ${fmtDate(task.current.date)}</div></div>` : `<div class="detail-text" style="color:var(--muted)">Комментариев пока нет</div>`}
+        </div>
+        ${task.history.length ? `<div class="detail-block"><div class="detail-label">История с прошлого отчёта</div>${historyHTML}</div>` : ``}
+        <a class="todoist-link" href="${task.url}" target="_blank" onclick="event.stopPropagation()">Открыть в Todoist →</a>
+      </div>
+    </div>
+    <div class="expand-hint">
+      <svg class="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      ${isOpen ? 'Свернуть' : 'Описание, статус и история'}
+    </div>
+  </div>`;
+}
+
+function render(){
+  renderStats();
+  renderSectionMap();
+  renderPills();
+  renderOwners();
+  renderPriority();
+  renderMatrix();
+  renderTimeline();
+  renderGantt();
+  const activePill = document.querySelector(".pill.active");
+  if(activePill && activePill.getAttribute("data-sec")!=="all"){
+    activePill.scrollIntoView({behavior:"smooth", block:"nearest", inline:"center"});
+  }
+  const anyFilter = state.search || state.due!=="all" || state.priority!=="all"
+    || state.section!=="all" || state.owner!=="all" || state.attnOnly;
+  const rb = document.getElementById("resetBtn");
+  if(rb) rb.style.display = anyFilter ? "" : "none";
+  document.querySelectorAll(".team-card[data-owner]").forEach(tc=>{
+    tc.classList.toggle("active", state.owner===tc.getAttribute("data-owner"));
+  });
+  const content = document.getElementById("content");
+  const filtered = TASKS.filter(matchesFilters);
+  if(!filtered.length){ content.innerHTML = `<div class="empty">Нет задач по выбранным фильтрам</div>`; return; }
+
+  const bySection = {};
+  filtered.forEach(t=>{ if(!bySection[t.section]) bySection[t.section]=[]; bySection[t.section].push(t); });
+
+  let html = "";
+  SECTIONS.forEach(s=>{
+    const tasks = bySection[s.key];
+    if(!tasks || !tasks.length) return;
+    tasks.sort((a,b)=> (getDueCategory(a)==="overdue"?-1:0)-(getDueCategory(b)==="overdue"?-1:0) || a.priority-b.priority);
+    html += `<div class="section-block" id="sec-${s.key}" style="--sc:${secColor(s.key)}">
+      <div class="section-header" style="--sc:${secColor(s.key)}">
+        <div class="shead"><span class="sdot"></span><h2>${s.name}</h2></div>
+        <div class="shead-right">
+          ${tasks.filter(t=>getDueCategory(t)==="overdue").length ? `<span class="sh-chip over">${tasks.filter(t=>getDueCategory(t)==="overdue").length} просрочено</span>` : ``}
+          ${tasks.filter(isAttention).length ? `<span class="sh-chip attn">${tasks.filter(isAttention).length} акционеру</span>` : ``}
+          <span class="section-count">${tasks.length} ${plural(tasks.length,'задача','задачи','задач')}</span>
+        </div>
+      </div>
+      <div class="grid">${tasks.map(cardHTML).join("")}</div>
+    </div>`;
+  });
+  content.innerHTML = html;
+
+  content.querySelectorAll(".card").forEach(card=>{
+    card.addEventListener("click", ()=>{ const id=card.getAttribute("data-id"); state.open[id]=!state.open[id]; render(); });
+  });
+  content.querySelectorAll(".avatar[data-owner]").forEach(av=>{
+    av.addEventListener("click", e=>{
+      e.stopPropagation();
+      const k = av.getAttribute("data-owner");
+      state.owner = (state.owner===k) ? "all" : k;
+      const sel = document.getElementById("ownerFilter");
+      if(sel) sel.value = state.owner;
+      render();
+    });
+  });
+}
+
+document.getElementById("searchInput").addEventListener("input", e=>{ state.search = e.target.value; render(); });
+document.getElementById("attnFilterBtn").addEventListener("click", function(){
+  state.attnOnly = !state.attnOnly;
+  this.classList.toggle("active", state.attnOnly);
+  render();
+});
+document.getElementById("dueFilter").addEventListener("change", e=>{ state.due = e.target.value; render(); });
+document.getElementById("priorityFilter").addEventListener("change", e=>{ state.priority = e.target.value; render(); });
+document.getElementById("ownerFilter").addEventListener("change", e=>{ state.owner = e.target.value; render(); });
+
+document.getElementById("execHead").addEventListener("click", ()=>{
+  const el = document.getElementById("execBlock");
+  el.classList.toggle("collapsed");
+  document.getElementById("execToggleLabel").textContent = el.classList.contains("collapsed") ? "Показать ▼" : "Свернуть ▲";
+});
+
+document.getElementById("statsRow").addEventListener("click", e=>{
+  const st = e.target.closest(".stat");
+  if(!st) return;
+  const f = st.getAttribute("data-filter");
+  if(!f) return;
+  if(f==="attn"){
+    state.attnOnly = !state.attnOnly;
+    const b = document.getElementById("attnFilterBtn");
+    b.classList.toggle("active", state.attnOnly);
+  } else if(f==="all"){
+    state.due="all"; state.priority="all"; state.section="all"; state.owner="all";
+    state.attnOnly=false; state.search="";
+    document.getElementById("searchInput").value="";
+    document.getElementById("dueFilter").value="all";
+    document.getElementById("priorityFilter").value="all";
+    document.getElementById("ownerFilter").value="all";
+    document.getElementById("attnFilterBtn").classList.remove("active");
+  } else {
+    state.due = (state.due===f) ? "all" : f;
+    document.getElementById("dueFilter").value = state.due;
+  }
+  render();
+  document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  state.due="all"; state.priority="all"; state.section="all"; state.owner="all";
+  state.attnOnly=false; state.search="";
+  document.getElementById("searchInput").value="";
+  document.getElementById("dueFilter").value="all";
+  document.getElementById("priorityFilter").value="all";
+  document.getElementById("ownerFilter").value="all";
+  document.getElementById("attnFilterBtn").classList.remove("active");
+  render();
+});
+
+document.getElementById("tlToggle").addEventListener("click", e=>{
+  e.stopPropagation();
+  const btn = e.target.closest("button[data-view]");
+  if(!btn) return;
+  const v = btn.getAttribute("data-view");
+  document.querySelectorAll("#tlToggle button").forEach(x=>x.classList.toggle("active", x===btn));
+  document.getElementById("viewWeeks").style.display = (v==="weeks") ? "" : "none";
+  document.getElementById("viewGantt").style.display = (v==="gantt") ? "" : "none";
+});
+
+const expandAllBtn = document.getElementById("expandAllBtn");
+expandAllBtn.addEventListener("click", ()=>{
+  const visible = TASKS.filter(matchesFilters);
+  const allOpen = visible.length && visible.every(t=>state.open[t.id]);
+  visible.forEach(t=>{ state.open[t.id] = !allOpen; });
+  expandAllBtn.textContent = allOpen ? "⤢ Развернуть все" : "⤡ Свернуть все";
+  render();
+});
+
+document.addEventListener("keydown", e=>{
+  if(document.getElementById("password-screen").style.display!=="none") return;
+  const tag = (e.target.tagName||"").toLowerCase();
+  if(e.key==="/" && tag!=="input" && tag!=="select"){
+    e.preventDefault(); document.getElementById("searchInput").focus();
+  }
+  if(e.key==="Escape"){ document.getElementById("resetBtn").click(); document.activeElement.blur(); }
+});
+
+const toTop = document.getElementById("toTop");
+toTop.addEventListener("click", ()=>window.scrollTo({top:0,behavior:"smooth"}));
+window.addEventListener("scroll", ()=>{ toTop.classList.toggle("show", window.scrollY>600); });
+
+document.querySelectorAll(".blk[data-blk] .blk-head").forEach(h=>{
+  h.addEventListener("click", ()=>{
+    const blk = h.closest(".blk");
+    blk.classList.toggle("collapsed");
+    const t = h.querySelector(".blk-toggle");
+    if(t) t.textContent = blk.classList.contains("collapsed") ? "Показать ▼" : "Свернуть ▲";
+  });
+});
+
+document.querySelectorAll(".team-card[data-owner]").forEach(tc=>{
+  tc.addEventListener("click", ()=>{
+    const k = tc.getAttribute("data-owner");
+    state.owner = (state.owner===k) ? "all" : k;
+    const sel = document.getElementById("ownerFilter");
+    if(sel) sel.value = state.owner;
+    render();
+    document.querySelector(".controls").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+});
+
+populateFilters();
+render();
+
+(function intro(){
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce) return;
+  document.querySelectorAll(".blk").forEach((b,i)=>{
+    b.style.animationDelay = (0.06*i)+"s";
+    b.classList.add("intro");
+  });
+  document.querySelectorAll("#statsRow .num").forEach((el,i)=>{
+    const target = parseInt(el.textContent,10);
+    if(isNaN(target) || target===0) return;
+    let cur = 0;
+    const step = Math.max(1, Math.round(target/18));
+    el.textContent = "0";
+    const iv = setInterval(()=>{
+      cur += step;
+      if(cur>=target){ cur = target; clearInterval(iv); }
+      el.textContent = cur;
+    }, 32);
+  });
+})();
+
+function exportPDF(){
+  const styleTag = document.querySelector('style').outerHTML;
+  const bodyClone = document.body.cloneNode(true);
+  bodyClone.querySelectorAll('#password-screen').forEach(el=>el.remove());
+  bodyClone.querySelectorAll('.controls').forEach(el=>el.remove());
+  bodyClone.querySelectorAll('.pdf-btn').forEach(el=>el.remove());
+  bodyClone.querySelectorAll('.expand-hint').forEach(el=>el.remove());
+  bodyClone.querySelectorAll('.card').forEach(el=>{ el.classList.add('open'); el.style.cursor='default'; });
+  bodyClone.querySelectorAll('.timeline-scroll').forEach(el=>{ el.style.flexWrap='wrap'; el.style.overflow='visible'; });
+  bodyClone.querySelectorAll('#viewWeeks, #viewGantt').forEach(el=>{ el.style.display=''; });
+  bodyClone.querySelectorAll('.view-toggle').forEach(el=>el.remove());
+  const execEl = bodyClone.querySelector('.exec');
+  if(execEl) execEl.classList.remove('collapsed');
+
+  const docHtml = '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><title>Статус ключевых HR-задач</title>' + styleTag + '</head><body>' + bodyClone.innerHTML + '</body></html>';
+
+  // Try a real new tab first (works on desktop browsers)
+  let popup = null;
+  try { popup = window.open('', '_blank'); } catch(e) { popup = null; }
+
+  if(popup && !popup.closed){
+    popup.document.open();
+    popup.document.write(docHtml);
+    popup.document.close();
+    setTimeout(function(){ try{ popup.focus(); popup.print(); }catch(e){} }, 400);
+    return;
+  }
+
+  // Fallback for mobile/sandboxed WebViews: hidden iframe + print
+  let frame = document.getElementById('__pdfFrame');
+  if(frame) frame.remove();
+  frame = document.createElement('iframe');
+  frame.id = '__pdfFrame';
+  frame.style.position = 'fixed';
+  frame.style.right = '0';
+  frame.style.bottom = '0';
+  frame.style.width = '0';
+  frame.style.height = '0';
+  frame.style.border = '0';
+  frame.style.visibility = 'hidden';
+  document.body.appendChild(frame);
+
+  const fdoc = frame.contentWindow.document;
+  fdoc.open();
+  fdoc.write(docHtml);
+  fdoc.close();
+
+  frame.onload = function(){
+    try{
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    }catch(e){
+      alert('Печать недоступна в этом окне предпросмотра. Откройте файл во внешнем браузере (значок "Открыть в браузере" на карточке файла) и используйте печать/сохранение в PDF оттуда.');
+    }
+  };
+}
+</script>
+
+</body>
+</html>
